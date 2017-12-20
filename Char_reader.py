@@ -8,6 +8,7 @@ from collections import OrderedDict
 import plotly.offline as pl
 import plotly.graph_objs as gl_obs
 
+import matplotlib.pyplot as plt
 # import numpy as np
 
 pair_dict = {}
@@ -47,28 +48,8 @@ def shift(t, symbol):
 #         print(symbol)
 
 
-def main():
-    # filename = "Վիլյամ Սարոյան_Հայ մուկը"
-    filename = "Ֆրանց Կաֆկա_Կերպարանափոխություն"
-
-    f = codecs.open(filename, "r", "utf-8")
-    text = f.read()
-    print(type(text))
-    print("Analyzing file", filename, "...")
-
-    # make_chain(text)
-    for symbol in text:
-        process_block(symbol)
-
-    pair_dict_new = dict((str(key[0] + key[1]), value) for (key, value) in pair_dict.items())
-    print(pair_dict_new)
-
-    # print(s_pairr_dict[(' ', 'Գ')])
-    # text = 'Տեղեկատվությունը ուժ է։ Բայց բոլոր ուժերի պարագայում էլ կան մարդիկ, ովքեր ուզում են այդ ուժը իրենցը լինի։ Աշխարհի գիտական եւ մշակութային ժառանգությունը, որ դարերով տպվում էր ամսագրերում եւ գրքերում, այժմ գնալով ավելի ու ավելի շատ է թվայնացվում, եւ փակվում մի քանի մասնավոր կազմակերպությունների կողմից։ Ցանկանո՞ւմ ես կարդալ գիտական կարեւոր արդյունքներով ամսագիր։ Պետք է ահռելի գումար մուծես Ռիդ Էլսեվիերի նման հրատարակիչներին։ Կան մարդիկ, ովքեր պայքարում են սա փոխելու համար։ Բաց հասանելիության շարժումը (Open Access Movement) պայքարում է, որ գիտնականները չստորագրեն այնպիսի փաստաթղթեր, որով նրանք կհրաժարվեն իրենց հեղինակային իրավունքներից, ու նաեւ, որ գիտնականները համոզվեն, որ իրենց աշխատանքները լինելու են համացանցում, եւ հասանելի են լինելու բոլորին։ Բայց նույնիսկ, եթե լավագույն սցենարը տեղի ունենա, միեւնույնն է, դա կազդի այն ամենի վրա, ինչ կտպագրվի սրանից հետո։ Իսկ այն ամենը, ինչ արդեն իսկ տված է, կորած է։ Այս գինը շատ բարձր է։ Ստիպել գիտականներին, որ նրանք վճարեն, իրենց աշխատակիցների աշխատանքները կարդալու համար։ Սկանավորել ամբողջ գրադարաններ, բայց միայն Գուգլի ախպերությանը թույլ տալ օգտվելու դրանից։ Ապահովել Առաջին կարգի աշխարհի էլիտար համալսարաններին այդ գիտական ամսագրերը, բայց ո՞չ հարավային կիսագնդի երեխաներին։ Սա վիրավորական է եւ անընդունելի։ '
-    # text = 'ո ւո'
-
-    # Making an ordered dictionary
-    # d = {}
+def get_alphabet():
+    ''' Making an ordered dictionary of the alphabet '''
     d = OrderedDict()
     for j in range(1377, 1413):
         if j == ord("ւ"):
@@ -79,11 +60,15 @@ def main():
         if j == 1412:
             d["և"] = 0
 
-    u = False
+    return d
+
+
+def fill_dict(d, text):
     prev_c = ""
     for c in text:
         # if c in punct_marks: continue
-        if (ord(c) >= 1369) & (ord(c) <= 1375) | (ord(c) >= 1417) & (ord(c) <= 1418):
+        if (ord(c) >= 1369) & (ord(c) <= 1375) | \
+           (ord(c) >= 1417) & (ord(c) <= 1418):
             # print("Found punctuation mark", c, "...")
             continue
 
@@ -117,6 +102,32 @@ def main():
                     d[c] = 1
         prev_c = c
 
+    return d
+
+
+def main():
+    filename = "Ֆրանց Կաֆկա_Կերպարանափոխություն"
+
+    f = codecs.open(filename, "r", "utf-8")
+    text = f.read()
+    # print(type(text))
+    print("Analyzing file", filename, "...")
+
+    # make_chain(text)
+    for symbol in text:
+        process_block(symbol)
+
+    pair_dict_new = dict((str(key[0] + key[1]), value)
+                         for (key, value) in pair_dict.items())
+    # print(pair_dict_new)
+
+    d = get_alphabet()
+    print(d)
+
+    d = fill_dict(d, text)
+    print(d)
+
+    # print(d)
     e = {}
     num_chars = 4
     for i in range(len(text)):
@@ -127,7 +138,6 @@ def main():
         else:
             e[text[i: i + num_chars]] = 1
 
-
     # x_data = []
     # y_data = []
 
@@ -135,7 +145,6 @@ def main():
     #     x_data.append(i)
     #     y_data.append(i**i)
     #     print(y_data)
-
 
     # data = [gl_obs.Bar(x_data,y_data)]
     # pl.plot(data)
@@ -154,7 +163,7 @@ def main():
     data = [gl_obs.Bar(x=list(d.keys()),
                        y=list(d.values())
                        )]
-    print(d.values())
+    # print(d.values())
 
     fig = gl_obs.Figure(data=data, layout=layout)
 
@@ -165,7 +174,9 @@ def main():
                         )]
 
     # pl.plot(data1, filename='basic-pie.html')
-
+    # y = list(pair_dict_new['ռո'])
+    # plt.hist(x, y, histtype='bar', rwidth='0.8')
+    # plt.show()
     # print(pair_dict_new.values())
     # Need to switvh to normal histogram creation NW
     data2 = [gl_obs.Bar(x=list(pair_dict_new.keys()),
