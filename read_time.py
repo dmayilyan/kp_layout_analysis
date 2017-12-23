@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 # import plotly.offline as pl
 import plotly.graph_objs as gl_obs
 
+from line_profiler import LineProfiler
+
 
 def uc(l):
     return l + 1377
@@ -31,7 +33,8 @@ def make_dicts():
         real_index[chr(uc(list_letter))] = list_letter
         # print(chr(uc(list_letter)), list_letter)
         for letter2 in range(38):
-            dictlist[list_letter][chr(uc(list_letter)) + chr(uc(letter2 % 38))] = [0.0, 0]
+            dictlist[list_letter][chr(uc(list_letter)) +
+                                  chr(uc(letter2 % 38))] = [0.0, 0]
 
             if uc(letter2 % 38) == 1412:
                 dictlist[list_letter][chr(uc(list_letter)) + "և"] = [0.0, 0]
@@ -53,10 +56,12 @@ def make_dicts():
         # print(chr(uc(list_letter-1)), list_letter)
 
         for letter2 in range(38):
-            dictlist[list_letter][chr(uc(list_letter - 1)) + chr(uc(letter2 % 38))] = [0.0, 0]
+            dictlist[list_letter][chr(uc(list_letter - 1)) +
+                                  chr(uc(letter2 % 38))] = [0.0, 0]
 
             if uc(letter2 % 38) == 1412:
-                dictlist[list_letter][chr(uc(list_letter - 1)) + "և"] = [0.0, 0]
+                dictlist[list_letter][chr(uc(list_letter - 1)) +
+                                      "և"] = [0.0, 0]
     # print(type(real_index), end="!!!!!!!!!!!!!!!!!!!!")
 
     return real_index, dictlist
@@ -70,7 +75,8 @@ def plot_all(real_index, dictlist):
         if index >= 4:
             continue
         plt.subplot(2, 2, index + 1)
-        plt.bar(range(len(dict_item)), [y[0] for x, y in dict_item.items()], align='center')
+        plt.bar(range(len(dict_item)), [y[0] for x, y in dict_item.items()],
+                align='center')
         plt.xticks(range(len(dict_item)), [k for k in dict_item.keys()])
 
     plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05)
@@ -82,6 +88,9 @@ def decodef(x):
 
 # def window_gen(text):
 #     yield ([x,x+1] for x in text)
+
+def get_list(arr):
+    return "".join(str(x) for [x, _, _] in list(arr))
 
 def main():
     real_index, dictlist = make_dicts()
@@ -95,6 +104,12 @@ def main():
     # d = OrderedDict()
     d = {}
 
+    # Profiler
+    # lprofiler = LineProfiler()
+    # lpw = lprofiler()
+    # lpw =()
+    # lprofiler.print_stats()
+
     # for g in range(len(right_hand)):
     #     print("\"" + chr(ord(right_hand[g])-48) + "\", ", end="")
 
@@ -106,12 +121,11 @@ def main():
     right_hand_signs = {",", "․", "՛", "֊"}
 
     # print(arr)
-    text = "".join(str(x) for [x, y, z] in list(arr))
+    text = "".join(str(x) for [x, _, _] in list(arr))
     # mg = window_gen(text)
     # for i in mg:
     #     print(mg.__next__())
 
-    return 0
     # return 0
     time = [z for [x, y, z] in list(arr)]
     for i in range(len(text) - 1):
@@ -130,7 +144,8 @@ def main():
         if text[i:i + 2] in d:
             # print(d.get(text[i:i+2]))
             vals = d.get(text[i:i + 2])
-            d[text[i:i + 2]] = [x + y for x, y in zip(list(vals), [time[i + 1], 1])]
+            d[text[i:i + 2]] = [x + y for x, y in zip(list(vals),
+                                                      [time[i + 1], 1])]
         else:
             d[text[i:i + 2]] = [time[i + 1], 1]
 
@@ -158,7 +173,7 @@ def main():
     a_list = []
     for d_element in dictlist:
         # print(d_element.items())
-        a_list.append([y[0] for x,y in d_element.items()][4])
+        a_list.append([y[0] for x, y in d_element.items()][4])
 
     print(a_list)
     plt.scatter([range(39)], a_list)
