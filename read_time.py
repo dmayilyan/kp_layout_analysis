@@ -3,6 +3,7 @@
 
 from collections import OrderedDict
 import numpy as np
+import pandas as pd
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -12,6 +13,10 @@ import plotly.graph_objs as gl_obs
 
 from line_profiler import LineProfiler
 
+MarkDict = {}
+s_pair = ()
+
+df = pd.DataFrame()
 
 def uc(l):
     return l + 1377
@@ -89,8 +94,38 @@ def decodef(x):
 # def window_gen(text):
 #     yield ([x,x+1] for x in text)
 
+
 def get_list(arr):
     return "".join(str(x) for [x, _, _] in list(arr))
+
+
+# Making Markov chain
+def process_block(i, symbol, s_time, num_symbs=2):
+    ''' Go through the letters and make keys with list values '''
+    global s_pair
+    if len(s_pair) < num_symbs:
+        s_pair += (symbol,)
+        return
+
+    try:            # df.sym_time[s_time+1]
+        MarkDict[s_pair].append((symbol, s_time))
+    except KeyError:
+        MarkDict[s_pair] = [(symbol, s_time)]
+
+    s_pair = shift(s_pair, symbol)
+
+
+def shift(t, symbol):
+    ''' Shifting to next  '''
+    return t[1:] + (symbol,)
+
+
+def read_columns():
+    global df
+    df = pd.read_table("./time_files/time", sep="\t",
+                       header=None, names=["symb", "usymb", "sym_time"])
+    return df
+
 
 def main():
     real_index, dictlist = make_dicts()
@@ -127,7 +162,7 @@ def main():
     #     print(mg.__next__())
 
     # return 0
-    time = [z for [x, y, z] in list(arr)]
+    time = [z for [_, _, z] in list(arr)]
     for i in range(len(text) - 1):
         # if text[i:i+2] == "ղջ":
         #     print(time[i+1])
@@ -141,11 +176,14 @@ def main():
             # print("Found Backspace")
             continue
 
+        # process_block(i,)
+
         if text[i:i + 2] in d:
             # print(d.get(text[i:i+2]))
             vals = d.get(text[i:i + 2])
             d[text[i:i + 2]] = [x + y for x, y in zip(list(vals),
                                                       [time[i + 1], 1])]
+
         else:
             d[text[i:i + 2]] = [time[i + 1], 1]
 
@@ -166,16 +204,18 @@ def main():
             dictlist[real_index[text[i]]][text[i:i + 2]] = [x + y for x, y in zip(dict_vals, [time[i + 1], 1])]
             # print(dictlist[0])
 
+
+    print(dictlist)
     for d_element in dictlist:
         dictlist[real_index[list(d_element.keys())[0][0]]] = OrderedDict([x, y] if y[0] == 0. else (x, [y[0] / y[1], y[1]]) for x, y in d_element.items())
 
-    print(dictlist)
+    # print(dictlist)
     a_list = []
     for d_element in dictlist:
         # print(d_element.items())
         a_list.append([y[0] for x, y in d_element.items()][4])
 
-    print(a_list)
+    # print(a_list)
     plt.scatter([range(39)], a_list)
     plt.show()
 
@@ -279,4 +319,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    read_columns()
+    # main()
