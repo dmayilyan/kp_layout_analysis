@@ -4,14 +4,14 @@
 from collections import OrderedDict
 import numpy as np
 import pandas as pd
-
+import pprint
 import matplotlib
 import matplotlib.pyplot as plt
 
 # import plotly.offline as pl
 import plotly.graph_objs as gl_obs
 
-from line_profiler import LineProfiler
+# from line_profiler import LineProfiler
 
 MarkDict = {}
 s_pair = ()
@@ -100,7 +100,7 @@ def get_list(arr):
 
 
 # Making Markov chain
-def process_block(i, symbol, s_time, num_symbs=2):
+def process_block(symbol, s_time, num_symbs=2):
     ''' Go through the letters and make keys with list values '''
     global s_pair
     if len(s_pair) < num_symbs:
@@ -120,11 +120,40 @@ def shift(t, symbol):
     return t[1:] + (symbol,)
 
 
+# def get_datafile():
+#     f_list
+
+
 def read_columns():
     global df
     df = pd.read_table("./time_files/time", sep="\t",
                        header=None, names=["symb", "usymb", "sym_time"])
     return df
+
+
+def main1():
+    print(ord(df.symb[12]))
+    for i_symbol in range(df.symb.size - 2):
+
+        # if df.sym_time[i_symbol] == 0.0:
+        #     continue
+        # str_symb = df.symb[i_symbol]
+        # print(i_symbol, ord(str_symb))
+        # if (ord(str_symb) == 127):
+        #     print("Found Backspace", str_symb)
+        #     continue
+
+        # if i_symbol > 3000:
+        #     continue
+        # print(df.symb[i_symbol], df.sym_time[i_symbol])
+
+        process_block(df.symb[i_symbol], df.sym_time[i_symbol], 2)
+
+
+    # pprint.pprint(MarkDict, width=50)
+    # print(MarkDict)
+    # print(df.symb)
+    # print(df.symb)
 
 
 def main():
@@ -320,4 +349,5 @@ def main():
 
 if __name__ == '__main__':
     read_columns()
+    main1()
     # main()
