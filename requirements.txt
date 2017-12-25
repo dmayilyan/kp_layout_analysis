@@ -2,3 +2,5 @@ matplotlib
 collections
 codecs
 plotly
+pandaos
+pprint
