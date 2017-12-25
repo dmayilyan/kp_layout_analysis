@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 from collections import OrderedDict
 import numpy as np
 import pandas as pd
@@ -120,19 +121,23 @@ def shift(t, symbol):
     return t[1:] + (symbol,)
 
 
-# def get_datafile():
-#     f_list
+def get_datafile():
+    ''' Gets files in hardcoded folder '''
+    f_list = os.listdir('./time_files')
+    for file in f_list:
+        yield file
 
 
-def read_columns():
+def read_columns(tf):
+    ''' Read time data files by columns '''
     global df
-    df = pd.read_table("./time_files/time", sep="\t",
-                       header=None, names=["symb", "usymb", "sym_time"])
+    tf = './time_files/' + tf
+    df = pd.read_table(tf, sep="\t", header=None,
+                       names=["symb", "usymb", "sym_time"])
     return df
 
 
 def main1():
-    print(ord(df.symb[12]))
     for i_symbol in range(df.symb.size - 2):
 
         # if df.sym_time[i_symbol] == 0.0:
@@ -143,7 +148,7 @@ def main1():
         #     print("Found Backspace", str_symb)
         #     continue
 
-        # if i_symbol > 3000:
+        # if i_symbol > 4000:
         #     continue
         # print(df.symb[i_symbol], df.sym_time[i_symbol])
 
@@ -152,7 +157,6 @@ def main1():
 
     # pprint.pprint(MarkDict, width=50)
     # print(MarkDict)
-    # print(df.symb)
     # print(df.symb)
 
 
@@ -348,6 +352,15 @@ def main():
 
 
 if __name__ == '__main__':
-    read_columns()
-    main1()
+    time_files = get_datafile()
+    for tf in time_files:
+        read_columns(tf)
+        # print(tf)
+
+        main1()
+        print('Started analysing file: %s' % tf)
+        print(len(MarkDict))
+
+    pprint.pprint(MarkDict, width=50)
+
     # main()
