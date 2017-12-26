@@ -100,10 +100,38 @@ def get_list(arr):
     return "".join(str(x) for [x, _, _] in list(arr))
 
 
+# Initial edit of the data, detecting problematic characters
+def initial_edit():
+    ''' Function deals with carriage returns, spaces etc. '''
+    global df
+    # print(df[2413:2420])
+    for u_symbol in range(df.usymb.size - 1):
+        if df.usymb[u_symbol] == 13:
+            # df.symb[u_symbol] = chr(9166)
+            df.loc[u_symbol, 'symb'] = chr(9166)
+    #         print('Here is it!', u_symbol)
+
+    # df = df[]
+    # df = df[df.symb.null() and df.usymb == 13]
+    # df = df[df.symb.notnull()]
+    # df = df.reset_index(drop=True)
+    # df.reindex(method='ffill', fill_value=chr(9166))
+    # indexy = df.index
+    # print(indexy, 'HERE')
+    # df.symb.reindex(indexy, fill_value=chr(9166))
+
+    print(df[2413:2420])
+    # print(df)
+
+
 # Making Markov chain
 def process_block(symbol, s_time, num_symbs=2):
     ''' Go through the letters and make keys with list values '''
     global s_pair
+    # dealing with spaces
+    if symbol == ' ':
+        symbol = chr(9251)
+
     if len(s_pair) < num_symbs:
         s_pair += (symbol,)
         return
@@ -125,7 +153,8 @@ def get_datafile():
     ''' Gets files in hardcoded folder '''
     f_list = os.listdir('./time_files')
     for file in f_list:
-        yield file
+        if not file.startswith('text'):
+            yield file
 
 
 def read_columns(tf):
@@ -135,6 +164,34 @@ def read_columns(tf):
     df = pd.read_table(tf, sep="\t", header=None,
                        names=["symb", "usymb", "sym_time"])
     return df
+
+
+def make_plots():
+    for k, v in MarkDict.items():
+        data = []
+        [data.append(x) for _, x in v if x < 3000]
+        # [print(x) for _, x in v]
+
+        # Making the histogram title
+        grtitle = ''
+        for i in k:
+            grtitle += i
+
+        if len(data) < 40:
+            continue
+
+        # if k[0] == ' ':
+        #     k = (chr(9251), k[1])
+
+        # if k[1] == ' ':
+        #     k = (k[0], chr(9251))
+
+        # plt.hist(data, bins='sturges')
+        plt.hist(data, bins=100)
+        plt.title('Letter pair: ' + grtitle)
+        plt.show()
+        print(grtitle)
+        print(data)
 
 
 def main1():
@@ -152,7 +209,7 @@ def main1():
         #     continue
         # print(df.symb[i_symbol], df.sym_time[i_symbol])
 
-        process_block(df.symb[i_symbol], df.sym_time[i_symbol], 2)
+        process_block(df.symb[i_symbol], df.sym_time[i_symbol], 3)
 
 
     # pprint.pprint(MarkDict, width=50)
@@ -355,12 +412,13 @@ if __name__ == '__main__':
     time_files = get_datafile()
     for tf in time_files:
         read_columns(tf)
-        # print(tf)
+        initial_edit()
 
         main1()
         print('Started analysing file: %s' % tf)
         print(len(MarkDict))
 
-    pprint.pprint(MarkDict, width=50)
+    # pprint.pprint(MarkDict, width=50)
+    make_plots()
 
     # main()
