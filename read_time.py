@@ -3,6 +3,7 @@
 
 import os
 import pandas as pd
+import numpy
 import pprint
 import matplotlib.pyplot as plt
 
@@ -75,24 +76,68 @@ def read_columns(tf):
 
 
 def make_plots():
+
+    left_hand = {'ք', 'ո', 'ե', 'ռ', 'տ', 'ա', 'ս', 'դ', 'ֆ', 'գ',
+                 'զ', 'ղ', 'ց', 'վ', 'բ', 'է', 'թ', 'փ', 'ձ', 'ջ',
+                 'Ք', 'Ո', 'Ե', 'Ռ', 'Տ', 'Ա', 'Ս', 'Դ', 'Ֆ', 'Գ',
+                 'Զ', 'Ղ', 'Ց', 'Վ', 'Բ', 'Է', 'Թ', 'Փ', 'Ձ', 'Ջ'}
+    left_hand_signs = {'՝'}
+    right_hand = {'ը', 'ւ', 'ի', 'օ', 'պ', 'խ', 'ծ', 'շ', 'հ', 'յ',
+                  'կ', 'լ', 'ն', 'մ', 'և', 'ր', 'չ', 'ճ', 'ժ',
+                  'Ը', 'Ւ', 'Ի', 'Օ', 'Պ', 'Խ', 'Ծ', 'Շ', 'Հ', 'Յ',
+                  'Կ', 'Լ', 'Ն', 'Մ', 'Ր', 'Չ', 'Ճ', 'Ժ'}  # և is excluded
+    right_hand_signs = {',', '․', '՛', '֊'}
+
     for k, v in MarkDict.items():
+        # print(v)
+
+        # Making hand lists for graphing
         data = []
+        data_ll = []
+        data_rr = []
+        last_letter = k[len(k) - 1]
         [data.append(x) for _, x in v if x < 3000]
+        # looping through inner list
+        for symbol, x in v:
+            print(last_letter in right_hand, symbol in right_hand)
+            # if x < 3000:
+            #     continue
+
+            if last_letter in (left_hand | left_hand_signs):
+                if symbol in (left_hand | left_hand_signs):
+                    print('Left yay')
+                    data_ll.append(x)
+
+            if last_letter in (right_hand | right_hand_signs):
+                if symbol in (right_hand | right_hand_signs):
+                    print('YAY')
+                    data_rr.append(x)
+
+        print(data_rr)
+        # [data_ll.append(x) for symbol, x in v if symbol in (left_hand | left_hand_signs) if k[len(k)-1] in (left_hand | left_hand_signs) if x < 3000]
+        # [data_rr.append(x) for symbol, x in v if symbol in (right_hand | right_hand_signs) if k[len(k)-1] in (right_hand | right_hand_signs) if x < 3000]
+
 
         # Making the histogram title
         grtitle = ''
         for i in k:
+            # print(i)
             grtitle += i
 
-        if len(data) < 100:
+        if len(data) < 20:
             continue
 
+        # bins = numpy.linspace(0, 2000, 400)
         # plt.hist(data, bins='sturges')
-        plt.hist(data, bins=100)
+        plt.hist(data, bins=100, alpha=0.3, label='all')
+        plt.hist(data_ll, bins=100, alpha=0.3, label='Left-Left hand')
+        plt.hist(data_rr, bins=100, alpha=0.3, label='Right-Right hand')
         plt.title('Letter pair: ' + grtitle)
+        plt.legend(loc='upper right')
+
         plt.show()
-        print(grtitle)
-        print(data)
+        # print(grtitle)
+        # print(data)
 
 
 def main1():
@@ -113,17 +158,6 @@ def main1():
         process_block(df.symb[i_symbol], df.sym_time[i_symbol], 2)
 
 
-    left_hand = {'ք', 'ո', 'ե', 'ռ', 'տ', 'ա', 'ս', 'դ', 'ֆ', 'գ',
-                 'զ', 'ղ', 'ց', 'վ', 'բ', 'է', 'թ', 'փ', 'ձ', 'ջ',
-                 'Ք', 'Ո', 'Ե', 'Ռ', 'Տ', 'Ա', 'Ս', 'Դ', 'Ֆ', 'Գ',
-                 'Զ', 'Ղ', 'Ց', 'Վ', 'Բ', 'Է', 'Թ', 'Փ', 'Ձ', 'Ջ'}
-    left_hand_signs = {'՝'}
-    right_hand = {'ը', 'ւ', 'ի', 'օ', 'պ', 'խ', 'ծ', 'շ', 'հ', 'յ',
-                  'կ', 'լ', 'ն', 'մ', 'և', 'ր', 'չ', 'ճ', 'ժ',
-                  'Ը', 'Ւ', 'Ի', 'Օ', 'Պ', 'Խ', 'Ծ', 'Շ', 'Հ', 'Յ',
-                  'Կ', 'Լ', 'Ն', 'Մ',      'Ր', 'Չ', 'Ճ', 'Ժ'}  # և is excluded
-    right_hand_signs = {',', '․', '՛', '֊'}
-
     # pprint.pprint(MarkDict, width=50)
     # print(MarkDict)
     # print(df.symb)
@@ -137,7 +171,7 @@ if __name__ == '__main__':
 
         main1()
         print('Started analysing file: %s' % tf)
-        print(len(MarkDict))
+        # print(len(MarkDict))
 
     # pprint.pprint(MarkDict, width=50)
     make_plots()
