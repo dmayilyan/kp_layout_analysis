@@ -11,7 +11,9 @@ class _GetchUnix:
         # import termios
 
     def __call__(self):
-        import sys, tty, termios
+        import sys
+        import tty
+        import termios
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
@@ -52,7 +54,7 @@ def make_dir(text_filename):
         # print("Data folder succesfully created")
         print("Տվյալների պանակը հաջողությամբ ստեղծվեց\n")
         print("Տեքստը հասանելի կլինի %s հասցեով" % (text_filename))
-    except FileExistsError:
+    except file.exists:  # ????????????????????????????????????????????????????
         # print("\nData folder exists\n Jumping to the main code")
         print("\nՏվյալների պանակը գոյություն ունի\nԱնցնենք բուն գործին\n")
         print("Տեքստը հասանելի կլինի %s հասցեով" % (text_filename))
@@ -76,7 +78,10 @@ while True:
     k = getKey()
     # Exiting on Esc key
     if k == "\x1b":
-        print("\n\nProgram Stopped Manually!\n------------------------------\nԾրագիրը հաջողությամբ ավարտվեց\nՁեր հավաքած տեքստը հասանելի է պանակում")
+        print("\n\nProgram Stopped Manually!\n" +
+              "------------------------------\n" +
+              "Ծրագիրը հաջողությամբ ավարտվեց\n" +
+              "Ձեր հավաքած տեքստը հասանելի է պանակում")
         break
     # Next line is hit
     if ord(k) == 13:
@@ -109,7 +114,8 @@ for k in range(len(keys)):
         out_time.write("%s\t%d\t%f\n" % (keys[k], ord(keys[k]), 0.0))
     else:
         print(keys[k], ord(keys[k]), (timelist[k] - t0) * 1000)
-        out_time.write("%s\t%d\t%f\n" % (keys[k], ord(keys[k]), (timelist[k] - t0) * 1000))
+        out_time.write("%s\t%d\t%f\n" % (keys[k], ord(keys[k]),
+                                         (timelist[k] - t0) * 1000))
         t0 = timelist[k]
 
 for k in range(len(keys_clean)):
