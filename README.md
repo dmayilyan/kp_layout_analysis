@@ -7,7 +7,7 @@ A sample output looks like:
 
 ## File list
 
-Char_reader.py: File text analysis (needs to be "united" with the wiki_parser)
-timestamps.py: Keylogger to analyse typing patterns
-read_time.py: Analyser of the files created by timestamps.py
-wiki_parser.py: Exploring real world symbol usage patterns.
+- Char_reader.py: File text analysis (needs to be "united" with the wiki_parser)
+- timestamps.py: Keylogger to analyse typing patterns
+- read_time.py: Analyser of the files created by timestamps.py
+- wiki_parser.py: Exploring real world symbol usage patterns.
