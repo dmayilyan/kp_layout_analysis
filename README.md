@@ -11,3 +11,7 @@ A sample output looks like:
 - timestamps.py: Keylogger to analyse typing patterns
 - read_time.py: Analyser of the files created by timestamps.py
 - wiki_parser.py: Exploring real world symbol usage patterns.
+
+## Layouts
+
+Layouts are taken from `/usr/share/X11/xkb/symbols/`
