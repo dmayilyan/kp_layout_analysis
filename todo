@@ -1,0 +1,9 @@
+timestamp:
+	- Add a gui to the keylogger?
+	- Make an extension for a popular browser to ease data collection
+
+Global:
+	+ Make a map of keys to given layout
+	- Define Hamming distance for keyboard layout
+	- Find/define other metrics ?!
+	- kNN training
