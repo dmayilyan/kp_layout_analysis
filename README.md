@@ -1,6 +1,7 @@
 # Keyboard Layout analysis and typing speed patterns
 
 Analysis of human typing delays and keyboard layout efficiency as well as analysis of user input patterns.
+Program is devided into two seperate parts: Analysis of wikipedia text on symbol usage frequencies mapped on keyboard layout and Keylogger and further analysis to find typing patterns, bottlenecks etc. Plan is to go on and use machine learning to train and offer optimised keyboard layouts for any language.
 
 A sample output looks like:
 ![graph](https://github.com/dmayilyan/kp_layout_analysis/blob/master/graphs/sample.png)
