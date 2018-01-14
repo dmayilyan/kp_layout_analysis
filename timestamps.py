@@ -33,11 +33,6 @@ def getKey():
     return k
 
 
-keys = []
-keys_clean = []
-timelist = []
-
-
 # if os.path.isdir("./time_file"):
 #     print("\nData folder exists\n")
 # else:
@@ -54,7 +49,7 @@ def make_dir(text_filename):
         # print("Data folder succesfully created")
         print("Տվյալների պանակը հաջողությամբ ստեղծվեց\n")
         print("Տեքստը հասանելի կլինի %s հասցեով" % (text_filename))
-    except file.exists:  # ????????????????????????????????????????????????????
+    except OSError:
         # print("\nData folder exists\n Jumping to the main code")
         print("\nՏվյալների պանակը գոյություն ունի\nԱնցնենք բուն գործին\n")
         print("Տեքստը հասանելի կլինի %s հասցեով" % (text_filename))
@@ -65,68 +60,83 @@ def make_dir(text_filename):
         pass
 
 
-filename = time.strftime("%d.%m.%Y_%H:%M", time.localtime())
-text_filename = "./data_files/text_" + filename
-data_filename = "./data_files/data_" + filename
-
-# Creating the work folder
-make_dir(text_filename)
+def write_kb_info():
+    with open('./data_files/kb_info', 'w') as f:
+        subprocess.Popen(['setxkbmap', '-query'], stdout=f)
 
 
-print("Տպեք տեքստը ստորև\n------------------------------")
-while True:
-    k = getKey()
-    # Exiting on Esc key
-    if k == "\x1b":
-        print("\n\nProgram Stopped Manually!\n" +
-              "------------------------------\n" +
-              "Ծրագիրը հաջողությամբ ավարտվեց\n" +
-              "Ձեր հավաքած տեքստը հասանելի է պանակում")
-        break
-    # Next line is hit
-    if ord(k) == 13:
-        print(k)
-    if k != chr(127):
-        t = time.time()
-        timelist.append(t)
-        keys.append(k)
-        keys_clean.append(k)
-        sys.stdout.write(k)
-        sys.stdout.flush()
-    else:
+def main():
+    keys = []
+    keys_clean = []
+    timelist = []
 
-        t = time.time()
-        timelist.append(t)
-        keys.append(k)
-        keys_clean.pop()
-        sys.stdout.write("\b \b")
-        sys.stdout.flush()
-        # print(chr(8))
+    filename = time.strftime("%d.%m.%Y_%H:%M", time.localtime())
+    text_filename = "./data_files/text_" + filename
+    data_filename = "./data_files/data_" + filename
+
+    # Creating the work folder
+    make_dir(text_filename)
+
+    print("Տպեք տեքստը ստորև\n------------------------------")
+    while True:
+        k = getKey()
+        # Exiting on Esc key
+        if k == "\x1b":
+            print("\n\nProgram Stopped Manually!\n" +
+                  "------------------------------\n" +
+                  "Ծրագիրը հաջողությամբ ավարտվեց\n" +
+                  "Ձեր հավաքած տեքստը հասանելի է պանակում")
+            break
+        # Next line is hit
+        if ord(k) == 13:
+            print(k)
+        if k != chr(127):
+            t = time.time()
+            timelist.append(t)
+            keys.append(k)
+            keys_clean.append(k)
+            sys.stdout.write(k)
+            sys.stdout.flush()
+        else:
+
+            t = time.time()
+            timelist.append(t)
+            keys.append(k)
+            keys_clean.pop()
+            sys.stdout.write("\b \b")
+            sys.stdout.flush()
+            # print(chr(8))
 
 
-out_keys = sys.stdout
-out_keys = open(text_filename, "w")
-out_time = sys.stdout
-out_time = open(data_filename, "w")
-for k in range(len(keys)):
-    if k == 0:
-        t0 = timelist[0]
-        out_time.write("%s\t%d\t%f\n" % (keys[k], ord(keys[k]), 0.0))
-    else:
-        print(keys[k], ord(keys[k]), (timelist[k] - t0) * 1000)
-        out_time.write("%s\t%d\t%f\n" % (keys[k], ord(keys[k]),
-                                         (timelist[k] - t0) * 1000))
-        t0 = timelist[k]
+    out_keys = sys.stdout
+    out_keys = open(text_filename, "w")
+    out_time = sys.stdout
+    out_time = open(data_filename, "w")
+    for k in range(len(keys)):
+        if k == 0:
+            t0 = timelist[0]
+            out_time.write("%s\t%d\t%f\n" % (keys[k], ord(keys[k]), 0.0))
+        else:
+            # print(keys[k], ord(keys[k]), (timelist[k] - t0) * 1000)
+            out_time.write("%s\t%d\t%f\n" % (keys[k], ord(keys[k]),
+                                             (timelist[k] - t0) * 1000))
+            t0 = timelist[k]
 
-for k in range(len(keys_clean)):
-    out_keys.write(keys_clean[k])
+    for k in range(len(keys_clean)):
+        out_keys.write(keys_clean[k])
 
-# for j in range(1,len(timelist)):
-#     print(keys[j], ord(keys[j]), (timelist[j] - t0)*1000)
-#     t0 = timelist[j]
+    # for j in range(1,len(timelist)):
+    #     print(keys[j], ord(keys[j]), (timelist[j] - t0)*1000)
+    #     t0 = timelist[j]
 
-out_keys.close()
-out_time.close()
+    print(out_keys.__hash__())
+    out_keys.close()
+    out_time.close()
 
-print("Here you are!!!")
-subprocess.check_call(['xdg-open', "./data_files"])
+    print("Here you are!!!")
+    subprocess.check_call(['xdg-open', './data_files'])
+
+    write_kb_info()
+
+if __name__ == '__main__':
+    main()
