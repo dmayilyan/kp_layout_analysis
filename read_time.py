@@ -3,13 +3,16 @@
 
 import os
 import pandas as pd
-import numpy
+import numpy as np
 import pprint
 import matplotlib.pyplot as plt
+
+from symbols import get_symbol_name_dict
 
 # from line_profiler import LineProfiler
 
 MarkDict = {}
+MarkFrame = pd.DataFrame()
 s_pair = ()
 
 df = pd.DataFrame()
@@ -33,10 +36,15 @@ def initial_edit():
     # print(df[2413:2420])
 
 
+def str_compile(s_pair):
+    return ''.join(i for i in s_pair)
+
+
 # Making Markov chain
 def process_block(symbol, s_time, num_symbs=2):
     ''' Go through the letters and make keys with list values '''
     global s_pair
+    global MarkFrame
     # dealing with spaces
     if symbol == ' ':
         symbol = chr(9251)
@@ -45,11 +53,21 @@ def process_block(symbol, s_time, num_symbs=2):
         s_pair += (symbol,)
         return
 
-    try:            # df.sym_time[s_time+1]
+    try:
         MarkDict[s_pair].append((symbol, s_time))
+
     except KeyError:
         MarkDict[s_pair] = [(symbol, s_time)]
 
+    temp_list = []
+    s_pair_str = str_compile(s_pair)
+
+    temp_list.append(s_pair_str)
+    temp_list.append(symbol)
+    temp_list.append(s_time)
+    # list()
+    # print(s_pair_str)
+    MarkFrame.append(temp_list)
     s_pair = shift(s_pair, symbol)
 
 
@@ -99,49 +117,43 @@ def make_plots():
         [data.append(x) for _, x in v if x < 3000]
         # looping through inner list
         for symbol, x in v:
-            print(last_letter in right_hand, symbol in right_hand)
             # if x < 3000:
             #     continue
 
             if last_letter in (left_hand | left_hand_signs):
                 if symbol in (left_hand | left_hand_signs):
-                    print('Left yay')
                     data_ll.append(x)
 
             if last_letter in (right_hand | right_hand_signs):
                 if symbol in (right_hand | right_hand_signs):
-                    print('YAY')
                     data_rr.append(x)
 
-        print(data_rr)
-        # [data_ll.append(x) for symbol, x in v if symbol in (left_hand | left_hand_signs) if k[len(k)-1] in (left_hand | left_hand_signs) if x < 3000]
-        # [data_rr.append(x) for symbol, x in v if symbol in (right_hand | right_hand_signs) if k[len(k)-1] in (right_hand | right_hand_signs) if x < 3000]
-
-
         # Making the histogram title
-        grtitle = ''
-        for i in k:
-            # print(i)
-            grtitle += i
+        grtitle = str_compile(k)
 
-        if len(data) < 20:
+        if len(data) < 60:
             continue
 
         # bins = numpy.linspace(0, 2000, 400)
         # plt.hist(data, bins='sturges')
-        plt.hist(data, bins=100, alpha=0.3, label='all')
-        plt.hist(data_ll, bins=100, alpha=0.3, label='Left-Left hand')
-        plt.hist(data_rr, bins=100, alpha=0.3, label='Right-Right hand')
+        plt.hist(data, bins=100, range=(0, 3000), alpha=0.3, label='all')
+        if data_ll:
+            plt.hist(data_ll, bins=100, range=(0, 3000),
+                     alpha=0.3, label='Left-Left hand')
+        if data_rr:
+            plt.hist(data_rr, bins=100, range=(0, 3000),
+                     alpha=0.3, label='Right-Right hand')
         plt.title('Letter pair: ' + grtitle)
         plt.legend(loc='upper right')
+        # plt.xlim(0, 3000)
 
         plt.show()
         # print(grtitle)
         # print(data)
 
 
-def main1():
-    for i_symbol in range(df.symb.size - 2):
+def main():
+    for i_symbol in range(df.symb.size - 1):
 
         # if df.sym_time[i_symbol] == 0.0:
         #     continue
@@ -169,9 +181,10 @@ if __name__ == '__main__':
         read_columns(tf)
         initial_edit()
 
-        main1()
+        main()
         print('Started analysing file: %s' % tf)
         # print(len(MarkDict))
 
-    # pprint.pprint(MarkDict, width=50)
-    make_plots()
+    print(MarkFrame)
+    # pprint.pprint(MarkFrame, width=50)
+    # make_plots()
