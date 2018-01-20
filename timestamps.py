@@ -2,7 +2,7 @@ import subprocess
 import sys
 import os
 import time
-
+import hashlib
 
 class _GetchUnix:
     def __init__(self):
@@ -60,9 +60,23 @@ def make_dir(text_filename):
         pass
 
 
-def write_kb_info():
-    with open('./data_files/kb_info', 'w') as f:
+def write_kb_info(identifier):
+    with open('./data_files/kb_info_' + identifier, 'w') as f:
         subprocess.Popen(['setxkbmap', '-query'], stdout=f)
+
+
+def do_tagging(a, b, ident):
+    os.rename(a, a + ident)
+    os.rename(b, b + ident)
+
+
+def get_hash(filename):
+    md5 = hashlib.md5()
+    with open(filename, 'rb') as f:
+        file_content = f.read(65536)
+        md5.update(file_content)
+
+    return md5.hexdigest()
 
 
 def main():
@@ -70,7 +84,7 @@ def main():
     keys_clean = []
     timelist = []
 
-    filename = time.strftime("%d.%m.%Y_%H:%M", time.localtime())
+    filename = time.strftime("%d.%m.%Y_", time.localtime())
     text_filename = "./data_files/text_" + filename
     data_filename = "./data_files/data_" + filename
 
@@ -107,7 +121,6 @@ def main():
             sys.stdout.flush()
             # print(chr(8))
 
-
     out_keys = sys.stdout
     out_keys = open(text_filename, "w")
     out_time = sys.stdout
@@ -129,14 +142,18 @@ def main():
     #     print(keys[j], ord(keys[j]), (timelist[j] - t0)*1000)
     #     t0 = timelist[j]
 
-    print(out_keys.__hash__())
     out_keys.close()
     out_time.close()
 
     print("Here you are!!!")
     subprocess.check_call(['xdg-open', './data_files'])
 
-    write_kb_info()
+    print('Writing kb info')
+    identifier = get_hash(data_filename)
+    write_kb_info(identifier)
+    print('Attaching identifiers to the files')
+    do_tagging(text_filename, data_filename, identifier)
+
 
 if __name__ == '__main__':
     main()
