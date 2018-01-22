@@ -1,19 +1,13 @@
 import subprocess
 import sys
+import tty
+import termios
 import os
 import time
 import hashlib
 
 class _GetchUnix:
-    def __init__(self):
-        # import termios now or else you'll get the Unix version on the Mac
-        import tty
-        # import termios
-
     def __call__(self):
-        import sys
-        import tty
-        import termios
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
