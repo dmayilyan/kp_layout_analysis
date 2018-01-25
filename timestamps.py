@@ -20,6 +20,9 @@ class _GetchUnix:
 
 
 def getKey():
+    '''
+    Getting a key
+    '''
     inkey = _GetchUnix()
     for i in range(sys.maxsize):
         k = inkey()
@@ -28,13 +31,10 @@ def getKey():
     return k
 
 
-# if os.path.isdir('./time_file'):
-#     print('\nData folder exists\n')
-# else:
-#     print('Data folder doesn't exists\nMaking the folder')
-#     os.mkdir('./time_file')
-#     print('Data folder succesfully created')
 def make_dir(file_path):
+    '''
+    Checking data directory. If it doesn't exist, create it.
+    '''
     if os.path.isdir(file_path) is False:
         # print('Data folder doesn't exists\nMaking the folder')
         print('Պանակը գոյություն չունի\n\nՍտեղծում եմ...')
@@ -51,22 +51,31 @@ def make_dir(file_path):
         pass
     except PermissionError:
         # print('\nDon't have permission to create the folder')
-        print('\nՊանակ ստեղծելու արտոնություն չունեմ :/')
+        print('\nՊանակ ստեղծելու արտոնություն չունեմ :')
         pass
 
 
 def write_kb_info(f_path, identifier):
+    '''
+    Writing keyboard info of the writer.
+    '''
     filename = f_path + identifier + '_kb_info'
     with open(filename, 'w') as f:
         subprocess.Popen(['setxkbmap', '-query'], stdout=f)
 
 
 def do_tagging(f_path, t_posfix, d_posfix, ident):
+    '''
+    Updating text and data files with hash of the data file.
+    '''
     os.rename(f_path + t_posfix, f_path + ident + t_posfix)
     os.rename(f_path + d_posfix, f_path + ident + d_posfix)
 
 
 def get_hash(filename):
+    '''
+    Getting hash of the data file.
+    '''
     md5 = hashlib.md5()
     with open(filename, 'rb') as f:
         file_content = f.read(65536)
@@ -91,7 +100,7 @@ def main():
     print('Տպեք տեքստը ստորև\n------------------------------')
     while True:
         k = getKey()
-        # Exiting on Esc key
+        # Exiting on [Esc] key
         if k == '\x1b':
             print('\n\nProgram Stopped Manually!\n' +
                   '------------------------------\n' +
@@ -133,10 +142,6 @@ def main():
 
     for k in range(len(keys_clean)):
         out_keys.write(keys_clean[k])
-
-    # for j in range(1,len(timelist)):
-    #     print(keys[j], ord(keys[j]), (timelist[j] - t0)*1000)
-    #     t0 = timelist[j]
 
     out_keys.close()
     out_time.close()
