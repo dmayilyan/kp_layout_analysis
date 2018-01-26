@@ -7,14 +7,14 @@ import numpy as np
 import pprint
 import matplotlib.pyplot as plt
 
-from symbols import get_symbol_name_dict
+from symbols import layout_match
 
 # from line_profiler import LineProfiler
 
 
 class chain(object):
     '''
-    Read data files and fills them to DataFrame
+    Read data files and fills them to a DataFrame.
     '''
     def __init__(self):
         self.MarkDict = {}
@@ -26,24 +26,30 @@ class chain(object):
         return '(%s, %s) : time' % (self.s_pair[0], self.s_pair[1])
 
     def get_datafiles(self):
-        ''' Gets files form the hardcoded folder '''
-        f_list = os.listdir('./time_files')
-        for file in f_list:
-            if not file.startswith('text'):
-                yield file
+        ''' Gets files form the hardcoded folder. '''
+        f_list = os.listdir('./data_files')
+        if f_list:
+            for file in f_list:
+                if not file.startswith('text'):
+                    yield file
+        else:
+            raise Exception('Data folder is empty')
 
     def process_files(self):
         '''
         Gets the list of files in the fixed data folder
-        and reads columns to a DataFrame
+        and reads columns to a DataFrame.
         '''
+        # Checking directory existance
+        self.is_dir()
         time_files = self.get_datafiles()
         for tf in time_files:
+            print()
             self.read_columns(tf)
             self.initial_edit()
 
             print('Started analysing file: %s' % tf)
-            for i_symbol in range(self.df.symb.size - 1):
+            # for i_symbol in range(self.df.symb.size - 1):
 
                 # if df.sym_time[i_symbol] == 0.0:
                 #     continue
@@ -57,13 +63,19 @@ class chain(object):
 
                 # print(self.df.symb[i_symbol], self.df.sym_time[i_symbol])
 
-                self.process_block(self.df.symb[i_symbol],
-                                   self.df.sym_time[i_symbol],
-                                   2)  # Number of symbols
+                # self.process_block(self.df.symb[i_symbol],
+                #                    self.df.sym_time[i_symbol],
+                #                    2)  # Number of symbols
+
+    def is_dir(self):
+        ''' Checking data directory existance. '''
+        if os.path.isdir('./data_files/') is False:
+            print('Data folder doesn\'t exists\nExiting')
+            raise Exception('Folder doesn\'t exist')
 
     def read_columns(self, tf):
-        ''' Read time data files by columns '''
-        tf = './time_files/' + tf
+        ''' Read time data files by columns. '''
+        tf = './data_files/' + tf
         self.df = pd.read_table(tf, sep="\t", header=None,
                                 names=["symb", "usymb", "sym_time"])
 
@@ -116,6 +128,7 @@ class chain(object):
 
 
 def str_compile(s_pair):
+    ''' String from a tuple. '''
     return ''.join(i for i in s_pair)
 
 
