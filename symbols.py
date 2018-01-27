@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 
+import scipy.interpolate
+import numpy as np
+import matplotlib.pyplot as plt
 
 class layout_match(object):
     '''
@@ -50,8 +53,8 @@ class layout_match(object):
 
         # self.df = self.df['0', '1']
         # self.df.rename(columns={'reg':'dist'}, inplace=True)
-        print(self.df)
-        # return df
+        # print(self.df)
+        return self.df
 
 
 def layout_select(key_symbols: list):
@@ -67,9 +70,59 @@ def layout_select(key_symbols: list):
     return layouts[i]
 
 
+def arrange_keys(key_list, row_list):
+    shift_val = 0
+    for i in range(len(row_list)):
+        if row_list[i] == 1:
+            shift_val = 1.5
+            # print(shift_val)
+        elif row_list[i] == 2:
+            shift_val = 1.5 + 0.2
+        elif row_list[i] == 3:
+            shift_val = 1.5 + 0.2 + 0.5
+
+        # print(shift_val)
+        key_list[i] += shift_val
+        # print(row_list[i], key_list[i])
+
+        # print(key_list)
+    return key_list
+
+
+def make_plot(key_dist, area):
+    x = key_dist['dist'].tolist()
+    print(len(key_dist))
+    y = key_dist['row'].tolist()
+    x = arrange_keys(x, y)
+    y = [3.5 - i for i in y]
+
+    # fig, ax = plt.subplots()
+    fig = plt.figure(figsize=(10, 3))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_ticks(range(14))
+    ax.yaxis.set_ticks(range(5))
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.grid(True)
+
+    plt.scatter(x, y, s=area)
+
+
+    # plt.hist2d(x, y, bins=52)
+    plt.xlim(-0.5, 14)
+    plt.ylim(0, 4)
+    # plt.axis('off')
+
+    # plt.plot(x, y, marker='o', linestyle='None', weights)
+    plt.show()
+
+
 if __name__ == '__main__':
+    import matplotlib.cm as cm
     layout = layout_match()
-    # layout.detect_layout()
     layout.read_file('hy_EasternAlt')
     layout.get_symbol_name_dict()
-    layout.create_key_distance()
+    key_dist = layout.create_key_distance()
+
+    area = (15 * np.random.rand(12))**2
+    make_plot(key_dist, area)

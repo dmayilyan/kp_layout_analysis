@@ -7,7 +7,7 @@ import numpy as np
 import pprint
 import matplotlib.pyplot as plt
 
-from symbols import layout_match
+import symbols
 
 # from line_profiler import LineProfiler
 
@@ -196,6 +196,13 @@ def main():
     chain_item.process_files()
     print(chain_item)
     make_plots(chain_item.MarkDict)
+
+    layout = symbols.layout_match()
+    layout.read_file('hy_EasternAlt')
+    layout.get_symbol_name_dict()
+    key_dist = layout.create_key_distance()
+
+    symbols.make_plot(key_dist, TODO)
 
 
 if __name__ == '__main__':
