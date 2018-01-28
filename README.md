@@ -11,7 +11,8 @@ A sample output looks like:
 - Char_reader.py: File text analysis (needs to be "united" with the wiki_parser)
 - timestamps.py: Keylogger to analyse typing patterns
 - read_time.py: Analyser of the files created by timestamps.py
-- wiki_parser.py: Exploring real world symbol usage patterns.
+- wiki_parser.py: Exploring real world symbol usage patterns
+- symbols.py: Maps symbols to key names 
 
 ## Layouts
 
