@@ -12,7 +12,7 @@ import symbols
 # from line_profiler import LineProfiler
 
 
-class chain(object):
+class Chain(object):
     '''
     Read data files and fills them to a DataFrame.
     '''
@@ -22,34 +22,39 @@ class chain(object):
         self.MarkFrame = pd.DataFrame()
         self.df = pd.DataFrame()
 
+        self.data_folder = ''
+
     def __str__(self):
         return '(%s, %s) : time' % (self.s_pair[0], self.s_pair[1])
 
     def get_datafiles(self):
         ''' Gets files form the hardcoded folder. '''
-        f_list = os.listdir('./data_files')
+        f_list = os.listdir(self.data_folder)
         if f_list:
             for file in f_list:
                 if not file.startswith('text'):
-                    yield file
+                    # Extra debug check
+                    if not file.startswith('data_'):
+                        yield file
         else:
-            raise Exception('Data folder is empty')
+            raise Exception('Data folder \"%s\" is empty' % self.data_folder)
 
     def process_files(self):
         '''
         Gets the list of files in the fixed data folder
         and reads columns to a DataFrame.
         '''
+        self.data_folder = './time_files/'
         # Checking directory existance
         self.is_dir()
         time_files = self.get_datafiles()
         for tf in time_files:
-            print()
+            # print(tf)
             self.read_columns(tf)
             self.initial_edit()
 
             print('Started analysing file: %s' % tf)
-            # for i_symbol in range(self.df.symb.size - 1):
+            for i_symbol in range(self.df.symb.size - 1):
 
                 # if df.sym_time[i_symbol] == 0.0:
                 #     continue
@@ -63,19 +68,19 @@ class chain(object):
 
                 # print(self.df.symb[i_symbol], self.df.sym_time[i_symbol])
 
-                # self.process_block(self.df.symb[i_symbol],
-                #                    self.df.sym_time[i_symbol],
-                #                    2)  # Number of symbols
+                self.process_block(self.df.symb[i_symbol],
+                                   self.df.sym_time[i_symbol],
+                                   2)  # Number of symbols
 
     def is_dir(self):
         ''' Checking data directory existance. '''
-        if os.path.isdir('./data_files/') is False:
-            print('Data folder doesn\'t exists\nExiting')
-            raise Exception('Folder doesn\'t exist')
+        if os.path.isdir(self.data_folder) is False:
+            print('Data folder  doesn\'t exists\nExiting')
+            raise Exception('Folder \"%s\" doesn\'t exist' % self.data_folder)
 
     def read_columns(self, tf):
         ''' Read time data files by columns. '''
-        tf = './data_files/' + tf
+        tf = self.data_folder + tf
         self.df = pd.read_table(tf, sep="\t", header=None,
                                 names=["symb", "usymb", "sym_time"])
 
@@ -132,7 +137,7 @@ def str_compile(s_pair):
     return ''.join(i for i in s_pair)
 
 
-def make_plots(MarkDict):
+def make_plots(MarkDict, key_dist):
     ''' Doing some analysis '''
 
     left_hand = {'ք', 'ո', 'ե', 'ռ', 'տ', 'ա', 'ս', 'դ', 'ֆ', 'գ',
@@ -146,8 +151,9 @@ def make_plots(MarkDict):
                   'Կ', 'Լ', 'Ն', 'Մ', 'Ր', 'Չ', 'Ճ', 'Ժ'}  # և is excluded
     right_hand_signs = {',', '․', '՛', '֊'}
 
+    # pprint.pprint(MarkDict)
     for k, v in MarkDict.items():
-        # print(v)
+        # print(k,v)
 
         # Making hand lists for graphing
         data = []
@@ -186,23 +192,31 @@ def make_plots(MarkDict):
         plt.title('Letter pair: ' + grtitle)
         plt.legend(loc='upper right')
 
+
+        # symbols.make_plot(key_dist, )
+
+
+
         # plt.show()
         # print(grtitle)
         # print(data)
 
 
 def main():
-    chain_item = chain()
+    chain_item = Chain()
     chain_item.process_files()
-    print(chain_item)
-    make_plots(chain_item.MarkDict)
+    # print(chain_item)
+
+
 
     layout = symbols.layout_match()
     layout.read_file('hy_EasternAlt')
     layout.get_symbol_name_dict()
     key_dist = layout.create_key_distance()
+    
+    make_plots(chain_item.MarkDict, key_dist)
 
-    symbols.make_plot(key_dist, TODO)
+
 
 
 if __name__ == '__main__':
