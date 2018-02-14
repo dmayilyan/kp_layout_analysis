@@ -4,42 +4,94 @@ import atexit
 import os
 
 import wikipedia as wiki
+# import sqlite3
+
+# c = sqlite3.connect(':memory:')
+
+# conn = conn.cursor()
 
 
 def in_range_arm(s):
-    other_chars = (' ', '(', ')')
+    other_chars = (' ', '(', ')', ',')
     if 1328 < ord(s) < 1423 or s in other_chars:
+        return 1
+    else:
+        return 0
+
+
+def are_all_chars_out(line):
+    '''
+    Check if all chars in the list are out of the selected language range.
+    '''
+    if any([in_range_arm(i) for i in line]):
+        # print('False')
         return 0
     else:
+        # print('True')
         return 1
+
+# def is_unicode_av_out(line):
+#     un_sum = 0
+#     for i in line:
+#         un_sum += ord(i)
+
+#     print(un_sum)
+
 
 # Do the ckeaning. Need to decide on cleaning patter
 def cleanup(p_content):
+    out_list = []
     for lin in p_content:
+        # print(type(lin))
         if '=' in lin:
             continue
         if len(lin) == 0:
             continue
-        print(lin)
-        print('/////////////////////////')
-        lin = ''.join([s for s in lin if not in_range_arm(s)])
+        if are_all_chars_out(lin):
+            continue
+        # print(lin)
+        # print('/////////////////////////')
+        temp_str = ''
+        for s in lin:
+            if in_range_arm(s):
+                if temp_str.endswith(' ') and s == ' ':
+                    continue
+                temp_str += s
+
+        # This nuimber choice is not perfect for latin languages
+        if len(set(temp_str)) < 5:
+            continue
+
+        lin = temp_str
+        # lin = ''.join([s for s in lin if not in_range_arm(s)])
         #  Use double spaces to reset the pattern detection
-        print(lin)
-        print('????')
+        # print(lin)
+        # print('????')
+        out_list.append(lin)
+
+    return out_list
 
 
 def wiki_parse():
+    # qwe = 'խւէ'
+    # are_all_chars_out(qwe)
+    # qwe = 'qwe'
+    # are_all_chars_out(qwe)
     wiki.set_lang('hy')
     t = wiki.random()
     page = wiki.page(title=t)
+    # page = wiki.page('Համշեն_արեւմտահայերէն')
     print(page.title)
-    p_content = page.content
-    print(p_content)
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    # p_content = page.content
     p_content = page.content.splitlines()
+    print(p_content)
+    print(len(p_content))
 
-    cleanup(p_content)
+    content_clean = cleanup(p_content)
 
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print(content_clean)
+    print(len(content_clean))
     # f, path = create_temp()
     # with open(path, 'w') as temp_f:
     #     temp_f.write(p_content)
@@ -63,6 +115,7 @@ def create_temp(prefix='tmp'):
 def remove_at_exit(f, path):
     # atexit.register(os.close, f)
     atexit.register(os.remove, path)
+    # conn.close()
 
 
 if __name__ == '__main__':
