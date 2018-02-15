@@ -4,12 +4,20 @@ import atexit
 import os
 
 import wikipedia as wiki
-# import sqlite3
+import sqlite3
+# from itertools import chain
 
-# c = sqlite3.connect(':memory:')
+conn = sqlite3.connect(':memory:')
 
-# conn = conn.cursor()
+c = conn.cursor()
 
+c.execute('''CREATE TABLE pairs (
+             key_pair text,
+             count integer
+             )''')
+
+
+pair_dict = {'a': 0}
 
 def in_range_arm(s):
     other_chars = (' ', '(', ')', ',')
@@ -72,6 +80,29 @@ def cleanup(p_content):
     return out_list
 
 
+def count_pairs(line):
+    for i in range(len(line) - 1):
+        pair = ''.join(line[i:i + 2])
+
+        if pair in pair_dict:
+            pair_dict[pair] += 1
+        else:
+            pair_dict[pair] = 1
+
+
+def insert_db(cont):
+    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    for line in cont:
+        count_pairs(line)
+
+    for (key, value) in pair_dict.items():
+        # print(key, value)
+        c.execute('INSERT INTO pairs VALUES (:key_pair, :count)',
+                  {'key_pair': key, 'count': value})
+
+    conn.commit()
+
+
 def wiki_parse():
     # qwe = 'խւէ'
     # are_all_chars_out(qwe)
@@ -92,6 +123,8 @@ def wiki_parse():
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     print(content_clean)
     print(len(content_clean))
+
+    insert_db(content_clean)
     # f, path = create_temp()
     # with open(path, 'w') as temp_f:
     #     temp_f.write(p_content)

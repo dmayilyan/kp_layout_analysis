@@ -1,6 +1,7 @@
 matplotlib
 collections
 codecs
-plotly
 pandaos
 pprint
+wikipedia
+sqlite3
