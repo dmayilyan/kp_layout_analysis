@@ -25,7 +25,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS pairs (
 
 
 pair_dict = {}
-article_set = set()
+# article_set = set()
 
 
 def in_range_arm(s):
@@ -67,8 +67,6 @@ def cleanup(p_content):
             continue
         if are_all_chars_out(lin):
             continue
-        # print(lin)
-        # print('/////////////////////////')
         temp_str = ''
         for s in lin:
             if in_range_arm(s):
@@ -81,10 +79,6 @@ def cleanup(p_content):
             continue
 
         lin = temp_str
-        # lin = ''.join([s for s in lin if not in_range_arm(s)])
-        #  Use double spaces to reset the pattern detection
-        # print(lin)
-        # print('????')
         out_list.append(lin)
 
     return out_list
@@ -106,7 +100,7 @@ def key_exist(symbols):
               {'key_pair': symbols})
 
     return c.fetchone()[0]
- 
+
 
 def insert_db(cont):
     for line in cont:
@@ -131,8 +125,11 @@ def insert_db(cont):
 
 def wiki_parse():
     wiki.set_lang('hy')
-    for i in range(20):
+    fo = open('./Databases/hy_article_list', 'a+')
+    article_set = set(fo.readlines())
+    for i in range(200):
         try:
+            print(article_set)
             t = wiki.random()
             if t in article_set:
                 return 0
@@ -168,6 +165,11 @@ def wiki_parse():
             print(article_set)
         except Exception:
             pass
+    article_set = map(lambda x: x + '\n', article_set)
+    print(article_set)
+    fo.writelines(article_set)
+    fo.close()
+
 
 
     # f, path = create_temp()
