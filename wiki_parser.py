@@ -7,20 +7,30 @@ import wikipedia as wiki
 import sqlite3
 # from itertools import chain
 
-conn = sqlite3.connect(':memory:')
+# conn = sqlite3.connect(':memory:')
+
+
+# if os.path.isfile('./Databases/hy_wiki.db'):
+
+# else:
+conn = sqlite3.connect('./Databases/hy_wiki.db')
+
 
 c = conn.cursor()
 
-c.execute('''CREATE TABLE pairs (
+c.execute('''CREATE TABLE IF NOT EXISTS pairs (
              key_pair text,
-             count integer
+             use_count integer
              )''')
 
 
-pair_dict = {'a': 0}
+pair_dict = {}
+article_set = set()
+
 
 def in_range_arm(s):
-    other_chars = (' ', '(', ')', ',')
+    # other_chars = (' ', '(', ')', ',')
+    other_chars = (' ', ',')
     if 1328 < ord(s) < 1423 or s in other_chars:
         return 1
     else:
@@ -90,41 +100,76 @@ def count_pairs(line):
             pair_dict[pair] = 1
 
 
+def key_exist(symbols):
+    c.execute('''SELECT EXISTS(SELECT 1 FROM pairs
+                                      WHERE key_pair=:key_pair)''',
+              {'key_pair': symbols})
+
+    return c.fetchone()[0]
+ 
+
 def insert_db(cont):
-    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     for line in cont:
         count_pairs(line)
 
     for (key, value) in pair_dict.items():
         # print(key, value)
-        c.execute('INSERT INTO pairs VALUES (:key_pair, :count)',
-                  {'key_pair': key, 'count': value})
+        if key_exist(key):
+            c.execute(''' SELECT * FROM pairs WHERE key_pair=:key_pair''',
+                      {'key_pair': key})
+            old_val = c.fetchone()
+            # print(old_val)
+            c.execute('''UPDATE pairs SET use_count=:new_count
+                         WHERE key_pair=:key_pair''',
+                      {'key_pair': key, 'new_count': old_val[1] + value})
+        else:
+            c.execute('INSERT INTO pairs VALUES (:key_pair, :use_count)',
+                      {'key_pair': key, 'use_count': value})
 
     conn.commit()
 
 
 def wiki_parse():
-    # qwe = 'խւէ'
-    # are_all_chars_out(qwe)
-    # qwe = 'qwe'
-    # are_all_chars_out(qwe)
     wiki.set_lang('hy')
-    t = wiki.random()
-    page = wiki.page(title=t)
-    # page = wiki.page('Համշեն_արեւմտահայերէն')
-    print(page.title)
-    # p_content = page.content
-    p_content = page.content.splitlines()
-    print(p_content)
-    print(len(p_content))
+    for i in range(20):
+        try:
+            t = wiki.random()
+            if t in article_set:
+                return 0
+            else:
+                article_set.add(t)
+            page = wiki.page(title=t)
+            # page = wiki.page('Համշեն_արեւմտահայերէն')
+            print(page.title)
+            # p_content = page.content
+            p_content = page.content.splitlines()
+            # p_content = ['ու ու ուզցգզցգզցգծ']
+            print(p_content)
+            print(len(p_content))
 
-    content_clean = cleanup(p_content)
+            content_clean = cleanup(p_content)
 
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print(content_clean)
-    print(len(content_clean))
+            print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+            print(content_clean)
+            print(len(content_clean))
 
-    insert_db(content_clean)
+            insert_db(content_clean)
+
+            # c.execute('SELECT Count(*) FROM pairs')
+            # print(c.fetchall())
+
+            # r = c.execute('SELECT * FROM pairs')
+            # print(c.fetchall())
+
+            # print(c['ու'], end=' qweqweqweq')
+
+            # print(key_exist('ու')[0], end=' !!!!!!!!!!!!!!!!!!!!!!!!\n\n\n')
+
+            print(article_set)
+        except Exception:
+            pass
+
+
     # f, path = create_temp()
     # with open(path, 'w') as temp_f:
     #     temp_f.write(p_content)
