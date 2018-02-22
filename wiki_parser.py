@@ -1,5 +1,7 @@
-import tempfile
-import atexit
+#!/usr/bin/env python
+
+# import tempfile
+# import atexit
 
 import os
 
@@ -9,12 +11,12 @@ import sqlite3
 
 # conn = sqlite3.connect(':memory:')
 
+lang = 'hy'
 
-# if os.path.isfile('./Databases/hy_wiki.db'):
+db_name = './Databases/' + lang + '_wiki.db'
+art_list = './Databases/' + lang + '_article_list'
 
-# else:
-conn = sqlite3.connect('./Databases/hy_wiki.db')
-
+conn = sqlite3.connect(db_name)
 
 c = conn.cursor()
 
@@ -26,6 +28,13 @@ c.execute('''CREATE TABLE IF NOT EXISTS pairs (
 
 pair_dict = {}
 # article_set = set()
+
+
+def read_db():
+    conn = sqlite3.connect(db_name)
+    c = conn.cursor()
+    return c.execute(''' SELECT * FROM pairs ''')
+    # return(c.fetchall())
 
 
 def in_range_arm(s):
@@ -124,8 +133,8 @@ def insert_db(cont):
 
 
 def wiki_parse():
-    wiki.set_lang('hy')
-    fo = open('./Databases/hy_article_list', 'a+')
+    wiki.set_lang(lang)
+    fo = open(art_list, 'a+')
     article_set = set(fo.readlines())
     for i in range(200):
         try:
@@ -151,6 +160,7 @@ def wiki_parse():
             print(len(content_clean))
 
             insert_db(content_clean)
+
 
             # c.execute('SELECT Count(*) FROM pairs')
             # print(c.fetchall())
@@ -184,18 +194,18 @@ def wiki_parse():
 
 
 # Creating a temp file
-def create_temp(prefix='tmp'):
-    f, path = tempfile.mkstemp(prefix)
-    # tempfile.mkstemp
-    remove_at_exit(f, path)
-    return f, path
+# def create_temp(prefix='tmp'):
+#     f, path = tempfile.mkstemp(prefix)
+#     # tempfile.mkstemp
+#     remove_at_exit(f, path)
+#     return f, path
 
 
 # Cleaning up at the end
-def remove_at_exit(f, path):
-    # atexit.register(os.close, f)
-    atexit.register(os.remove, path)
-    # conn.close()
+# def remove_at_exit(f, path):
+#     # atexit.register(os.close, f)
+#     atexit.register(os.remove, path)
+#     # conn.close()
 
 
 if __name__ == '__main__':
