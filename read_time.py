@@ -11,6 +11,7 @@ import symbols
 
 # from line_profiler import LineProfiler
 
+from wiki_parser import read_db
 
 class Chain(object):
     '''
@@ -132,9 +133,23 @@ class Chain(object):
         self.s_pair = self.s_pair[1:] + (symbol,)
 
 
+# #########################################
 def str_compile(s_pair):
     ''' String from a tuple. '''
     return ''.join(i for i in s_pair)
+
+# #########################################
+
+
+def get_weights():
+    db = read_db()
+    cols = [column[0] for column in db.description]
+    weight_df = pd.DataFrame.from_records(data=db.fetchall(), columns=cols)
+
+    total_count = weight_df['use_count'].sum()
+
+    weight_df['use_count'] = weight_df['use_count'].div(total_count)
+    print(weight_df)
 
 
 def make_plots(MarkDict, key_dist):
@@ -207,7 +222,8 @@ def main():
     chain_item.process_files()
     # print(chain_item)
 
-
+    get_weights()
+    return 0
 
     layout = symbols.layout_match()
     layout.read_file('hy_EasternAlt')
