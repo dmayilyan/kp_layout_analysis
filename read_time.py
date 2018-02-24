@@ -13,6 +13,7 @@ import symbols
 
 from wiki_parser import read_db
 
+
 class Chain(object):
     '''
     Read data files and fills them to a DataFrame.
@@ -20,7 +21,8 @@ class Chain(object):
     def __init__(self):
         self.MarkDict = {}
         self.s_pair = ()
-        self.MarkFrame = pd.DataFrame()
+        self.delta_dict = {}
+        # self.MarkFrame = pd.DataFrame()
         self.df = pd.DataFrame()
 
         self.data_folder = ''
@@ -35,8 +37,8 @@ class Chain(object):
             for file in f_list:
                 if not file.startswith('text'):
                     # Extra debug check
-                    if not file.startswith('data_'):
-                        yield file
+                    # if not file.startswith('data_'):
+                    yield file
         else:
             raise Exception('Data folder \"%s\" is empty' % self.data_folder)
 
@@ -49,12 +51,13 @@ class Chain(object):
         # Checking directory existance
         self.is_dir()
         time_files = self.get_datafiles()
+        # time_files = ['time']  # !!!!!!!!!!!!!!!!!!!!!!DEBUG
         for tf in time_files:
             # print(tf)
             self.read_columns(tf)
             self.initial_edit()
 
-            print('Started analysing file: %s' % tf)
+            print('Analysing file: %s' % tf)
             for i_symbol in range(self.df.symb.size - 1):
 
                 # if df.sym_time[i_symbol] == 0.0:
@@ -64,7 +67,7 @@ class Chain(object):
                 #     print("Found Backspace", str_symb)
                 #     continue
 
-                # if i_symbol > 4000:
+                # if i_symbol > 400:
                 #     continue
 
                 # print(self.df.symb[i_symbol], self.df.sym_time[i_symbol])
@@ -72,6 +75,20 @@ class Chain(object):
                 self.process_block(self.df.symb[i_symbol],
                                    self.df.sym_time[i_symbol],
                                    1)  # Number of symbols
+
+    def get_pairs(self):
+        '''
+        '''
+        self.data_folder = './time_files/'
+        # Checking directory existance
+        self.is_dir()
+        time_files = self.get_datafiles()
+        for tf in time_files:
+            print(tf)
+            # if i_symbol > 4:
+            #     continue
+
+
 
     def is_dir(self):
         ''' Checking data directory existance. '''
@@ -113,6 +130,7 @@ class Chain(object):
         if symbol == ' ':
             symbol = chr(9251)
 
+        # Making markov
         if len(self.s_pair) < num_symbs:
             self.s_pair += (symbol,)
             return
@@ -122,14 +140,24 @@ class Chain(object):
         except KeyError:
             self.MarkDict[self.s_pair] = [(symbol, s_time)]
 
-        temp_list = []
-        s_pair_str = str_compile(self.s_pair)
 
-        temp_list.append(s_pair_str)
-        temp_list.append(symbol)
-        temp_list.append(s_time)
+        # Making pair dict
+        s_pair_str = str_compile(self.s_pair)
+        s_pair_str = str_compile((s_pair_str, symbol))
         # print(s_pair_str)
-        self.MarkFrame.append(temp_list)
+
+        try:
+            self.delta_dict[s_pair_str].append((s_time))
+        except KeyError:
+            self.delta_dict[s_pair_str] = [s_time]
+
+
+        # temp_list = []
+        # temp_list.append(s_pair_str)
+        # temp_list.append(symbol)
+        # temp_list.append(s_time)
+        # self.MarkFrame.append(temp_list)
+        # print(self.MarkFrame)
         self.s_pair = self.s_pair[1:] + (symbol,)
 
 
@@ -140,14 +168,17 @@ def str_compile(s_pair):
 
 # #########################################
 
+
 key_dict_ratio = {}
-def get_weighted_dict():
+
+
+def get_weighted_dict(pair):
     cur = read_db()
     key_dict = dict(cur.fetchall())
     count_all = sum(key_dict.values())
     key_dict_ratio = dict(((item[0], (item[1] / count_all))
-                   for item in key_dict.items()))
-    # print(key_dict_ratio)
+                          for item in key_dict.items()))
+    print('Weight in all is ', key_dict_ratio[pair] * 100)
 
     # cols = [column[0] for column in cur.description]
     # weight_df = pd.DataFrame.from_records(data=cur.fetchall(), columns=cols)
@@ -159,6 +190,16 @@ def get_weighted_dict():
     # # weight_df.set_index('key_pair')
     # print(weight_df.loc[:, lambda df: df.key_pair == 'ու', :])
     # print(weight_df)
+
+
+def plot_pair(d, pair):
+    '''
+    Makes plot from a dict values
+    '''
+    plt.hist(d[pair], bins=200, range=(0, 1000))
+    plt.title('Letter pair: ' + pair)
+
+    plt.show()
 
 
 def make_plots(MarkDict, key_dist):
@@ -175,7 +216,7 @@ def make_plots(MarkDict, key_dist):
                   'Կ', 'Լ', 'Ն', 'Մ', 'Ր', 'Չ', 'Ճ', 'Ժ'}  # և is excluded
     right_hand_signs = {',', '․', '՛', '֊'}
 
-    pprint.pprint(MarkDict)
+    # pprint.pprint(MarkDict)
     for k, v in MarkDict.items():
         # print(k,v)
 
@@ -222,8 +263,8 @@ def make_plots(MarkDict, key_dist):
         # symbols.make_plot(key_dist, )
 
 
-        if grtitle in key_dict_ratio.keys():
-            print('Weight in all combinations ', key_dict_ratio[grtitle])
+        # if grtitle in key_dict_ratio.keys():
+        #     print('Weight in all combinations ', key_dict_ratio[grtitle])
 
         print(grtitle)
         plt.show()
@@ -232,18 +273,29 @@ def make_plots(MarkDict, key_dist):
 
 def main():
     chain_item = Chain()
+    # chain_item.get_pairs()
     chain_item.process_files()
-    # print(chain_item)
+    # pprint.pprint(chain_item.MarkDict)
+    # print(chain_item.delta_dict)
+    for key in chain_item.delta_dict.keys():
+        if len(chain_item.delta_dict[key]) < 50:
+            continue
+        try:
+            get_weighted_dict(key)
+        except Exception:
+            pass
+        plot_pair(chain_item.delta_dict, key)
+    # # print(chain_item)
 
-    get_weighted_dict()
-    # return 0
 
-    layout = symbols.layout_match()
-    layout.read_file('hy_EasternAlt')
-    layout.get_symbol_name_dict()
-    key_dist = layout.create_key_distance()
+    # # return 0
+
+    # layout = symbols.layout_match()
+    # layout.read_file('hy_EasternAlt')
+    # layout.get_symbol_name_dict()
+    # key_dist = layout.create_key_distance()
     
-    make_plots(chain_item.MarkDict, key_dist)
+    # make_plots(chain_item.MarkDict, key_dist)
 
 
 
