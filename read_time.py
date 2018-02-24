@@ -71,7 +71,7 @@ class Chain(object):
 
                 self.process_block(self.df.symb[i_symbol],
                                    self.df.sym_time[i_symbol],
-                                   2)  # Number of symbols
+                                   1)  # Number of symbols
 
     def is_dir(self):
         ''' Checking data directory existance. '''
@@ -107,7 +107,7 @@ class Chain(object):
         where:
 
         k: num_symbs [default: 2] times symbol sequence
-        t: time to the next symbol after the imput of the symbol sequence
+        t: time to the next symbol after the input of the symbol sequence
         '''
         # dealing with spaces
         if symbol == ' ':
@@ -140,16 +140,25 @@ def str_compile(s_pair):
 
 # #########################################
 
+key_dict_ratio = {}
+def get_weighted_dict():
+    cur = read_db()
+    key_dict = dict(cur.fetchall())
+    count_all = sum(key_dict.values())
+    key_dict_ratio = dict(((item[0], (item[1] / count_all))
+                   for item in key_dict.items()))
+    # print(key_dict_ratio)
 
-def get_weights():
-    db = read_db()
-    cols = [column[0] for column in db.description]
-    weight_df = pd.DataFrame.from_records(data=db.fetchall(), columns=cols)
+    # cols = [column[0] for column in cur.description]
+    # weight_df = pd.DataFrame.from_records(data=cur.fetchall(), columns=cols)
 
-    total_count = weight_df['use_count'].sum()
+    # total_count = weight_df['use_count'].sum()
+    # print(total_count)
 
-    weight_df['use_count'] = weight_df['use_count'].div(total_count)
-    print(weight_df)
+    # weight_df['use_count'] = weight_df['use_count'].div(total_count)
+    # # weight_df.set_index('key_pair')
+    # print(weight_df.loc[:, lambda df: df.key_pair == 'ու', :])
+    # print(weight_df)
 
 
 def make_plots(MarkDict, key_dist):
@@ -166,7 +175,7 @@ def make_plots(MarkDict, key_dist):
                   'Կ', 'Լ', 'Ն', 'Մ', 'Ր', 'Չ', 'Ճ', 'Ժ'}  # և is excluded
     right_hand_signs = {',', '․', '՛', '֊'}
 
-    # pprint.pprint(MarkDict)
+    pprint.pprint(MarkDict)
     for k, v in MarkDict.items():
         # print(k,v)
 
@@ -189,11 +198,13 @@ def make_plots(MarkDict, key_dist):
                 if symbol in (right_hand | right_hand_signs):
                     data_rr.append(x)
 
-        # Making the histogram title
-        grtitle = str_compile(k)
 
         if len(data) < 60:
             continue
+
+        # Making the histogram title
+        grtitle = str_compile(k)
+
 
         # bins = numpy.linspace(0, 2000, 400)
         # plt.hist(data, bins='sturges')
@@ -211,9 +222,11 @@ def make_plots(MarkDict, key_dist):
         # symbols.make_plot(key_dist, )
 
 
+        if grtitle in key_dict_ratio.keys():
+            print('Weight in all combinations ', key_dict_ratio[grtitle])
 
-        # plt.show()
-        # print(grtitle)
+        print(grtitle)
+        plt.show()
         # print(data)
 
 
@@ -222,8 +235,8 @@ def main():
     chain_item.process_files()
     # print(chain_item)
 
-    get_weights()
-    return 0
+    get_weighted_dict()
+    # return 0
 
     layout = symbols.layout_match()
     layout.read_file('hy_EasternAlt')

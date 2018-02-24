@@ -3,7 +3,7 @@
 # import tempfile
 # import atexit
 
-import os
+# import os
 
 import wikipedia as wiki
 import sqlite3
@@ -32,9 +32,9 @@ pair_dict = {}
 
 def read_db():
     conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-    return c.execute(''' SELECT * FROM pairs ''')
-    # return(c.fetchall())
+    cur = conn.cursor()
+    return cur.execute(''' SELECT * FROM pairs ''')
+    # return(cur.fetchall())
 
 
 def in_range_arm(s):
@@ -136,7 +136,7 @@ def wiki_parse():
     wiki.set_lang(lang)
     fo = open(art_list, 'a+')
     article_set = set(fo.readlines())
-    for i in range(200):
+    for i in range(600):
         try:
             print(article_set)
             t = wiki.random()
