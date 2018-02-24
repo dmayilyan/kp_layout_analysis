@@ -5,3 +5,4 @@ pandaos
 pprint
 wikipedia
 sqlite3
+astropy
