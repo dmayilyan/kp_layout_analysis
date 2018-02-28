@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import pprint
 import matplotlib.pyplot as plt
+from scipy import optimize
+from astropy import modeling
 
 import symbols
 
@@ -192,14 +194,37 @@ def get_weighted_dict(pair):
     # print(weight_df)
 
 
+def gaussian(x, amplitude, mean, stddev):
+    return amplitude * np.exp(-((x - mean) / 4 / stddev)**2)
+
+
 def plot_pair(d, pair):
     '''
     Makes plot from a dict values
     '''
-    plt.hist(d[pair], bins=200, range=(0, 1000))
-    plt.title('Letter pair: ' + pair)
 
+    hist, bin_edges = np.histogram(d[pair], bins=200, range=(0, 1000))
+    # plt.bar(bin_edges[:-1], hist, width=2)
+
+    nonz_hist = np.where(hist != 0, hist, np.nan)
+    # mean_val = np.mean(nonz_hist)
+    mean_val = np.nanmean(d[pair], 0)
+    variance = np.var(d[pair])
+    sigma = np.sqrt(variance)
+    print(mean_val, sigma)
+
+    fitter = modeling.fitting.LevMarLSQFitter()
+    model = modeling.models.Gaussian1D(15, mean_val, sigma)
+    fitted_model = fitter(model, bin_edges[:-1], hist)
+
+    plt.plot(bin_edges[:-1], hist)
+    plt.plot(bin_edges[:-1], fitted_model(bin_edges[:-1]))
+
+
+    plt.title('Letter pair: %s, Mean is: %f' % (pair, mean_val))
+    plt.xlim(min(bin_edges), max(bin_edges))
     plt.show()
+
 
 
 def make_plots(MarkDict, key_dist):
