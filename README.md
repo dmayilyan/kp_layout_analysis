@@ -10,7 +10,7 @@ A sample output looks like:
 
 - Char_reader.py: File text analysis (needs to be "united" with the wiki_parser)
 - timestamps.py: Keylogger to analyse typing patterns
-- read_time.py: Analyser of the files created by timestamps.py
+- read_time.py: Analyser of the files created by timestamps.py and wiki_parser.py. For two symbol sequences (yet) weight in the language and mean time delay is analysed. This are two of the features to be used later. 
 - wiki_parser.py: Exploring real world symbol usage patterns
 - symbols.py: Maps symbols to key names 
 
