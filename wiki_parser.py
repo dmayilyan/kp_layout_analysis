@@ -134,14 +134,14 @@ def insert_db(cont):
     conn.commit()
 
 
-def wiki_parse(arg):
+def wiki_parse(lang):
     print('yay')
     # if len(arg) > 1:
     #     raise Exception('Too many arguments, expect 1.')
-    return 0
 
 
     wiki.set_lang(lang)
+    return 0
     fo = open(art_list, 'a+')
     article_set = set(fo.readlines())
     for i in range(600):
@@ -219,15 +219,17 @@ def wiki_parse(arg):
 
 if __name__ == '__main__':
     lang_list = {'hy', 'en', 'de'}
+    print(sys.argv[1] in lang_list)
     try:
+        print(type(sys.argv[1]))
         if len(sys.argv[1:]) != 1:
             raise ValueError
-        if str(sys.argv[1:]) not in lang_list:
+        if sys.argv[1] not in lang_list:
             raise Exception
 
-        wiki_parse(sys.argv[1:])
+        wiki_parse(sys.argv[1])
     except ValueError:
-        sys.exit('Too many arguments, expect 1.')
-    except Exception:
+        sys.exit('Too many or too few arguments, expect 1.')
+    except Exception as e:
         sys.exit('Expect a value from %s set.' % lang_list)
     
