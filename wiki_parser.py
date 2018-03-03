@@ -5,6 +5,8 @@
 
 # import os
 
+import sys
+
 import wikipedia as wiki
 import sqlite3
 # from itertools import chain
@@ -132,7 +134,13 @@ def insert_db(cont):
     conn.commit()
 
 
-def wiki_parse():
+def wiki_parse(arg):
+    print('yay')
+    # if len(arg) > 1:
+    #     raise Exception('Too many arguments, expect 1.')
+    return 0
+
+
     wiki.set_lang(lang)
     fo = open(art_list, 'a+')
     article_set = set(fo.readlines())
@@ -208,5 +216,18 @@ def wiki_parse():
 #     # conn.close()
 
 
+
 if __name__ == '__main__':
-    wiki_parse()
+    lang_list = {'hy', 'en', 'de'}
+    try:
+        if len(sys.argv[1:]) != 1:
+            raise ValueError
+        if str(sys.argv[1:]) not in lang_list:
+            raise Exception
+
+        wiki_parse(sys.argv[1:])
+    except ValueError:
+        sys.exit('Too many arguments, expect 1.')
+    except Exception:
+        sys.exit('Expect a value from %s set.' % lang_list)
+    
