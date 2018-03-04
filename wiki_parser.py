@@ -13,23 +13,37 @@ import sqlite3
 
 # conn = sqlite3.connect(':memory:')
 
-lang = 'hy'
+# # lang = 'hy'
 
-db_name = './Databases/' + lang + '_wiki.db'
-art_list = './Databases/' + lang + '_article_list'
+# db_name = './Databases/' + lang + '_wiki.db'
+# art_list = './Databases/' + lang + '_article_list'
 
-conn = sqlite3.connect(db_name)
+# conn = sqlite3.connect(db_name)
 
-c = conn.cursor()
+# c = conn.cursor()
 
-c.execute('''CREATE TABLE IF NOT EXISTS pairs (
-             key_pair text,
-             use_count integer
-             )''')
+# c.execute('''CREATE TABLE IF NOT EXISTS pairs (
+#              key_pair text,
+#              use_count integer
+#              )''')
 
 
-pair_dict = {}
-# article_set = set()
+# pair_dict = {}
+# # article_set = set()
+
+class Wiki_parser(object):
+    def __init__(self, object):
+        db_name = './Databases/' + object + '_wiki.db'
+        self.art_list = './Databases/' + object + '_article_list'
+        self.conn = sqlite3.connect(db_name)
+        self.cur = self.conn.cursor()
+
+    def __call__(self):
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS pairs (
+                     key_pair text,
+                     use_count integer
+                     )''')
+
 
 
 def read_db():
@@ -67,7 +81,7 @@ def are_all_chars_out(line):
 #     print(un_sum)
 
 
-# Do the ckeaning. Need to decide on cleaning patter
+# Do the cleaning. Need to decide on cleaning patter
 def cleanup(p_content):
     out_list = []
     for lin in p_content:
@@ -140,8 +154,8 @@ def wiki_parse(lang):
     #     raise Exception('Too many arguments, expect 1.')
 
 
-    wiki.set_lang(lang)
     return 0
+    wiki.set_lang(lang)
     fo = open(art_list, 'a+')
     article_set = set(fo.readlines())
     for i in range(600):
@@ -218,6 +232,9 @@ def wiki_parse(lang):
 
 
 if __name__ == '__main__':
+    wiki_data = Wiki_parser(sys.argv[1])
+    
+
     lang_list = {'hy', 'en', 'de'}
     print(sys.argv[1] in lang_list)
     try:
