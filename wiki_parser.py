@@ -31,27 +31,172 @@ import sqlite3
 # pair_dict = {}
 # # article_set = set()
 
-class Wiki_parser(object):
-    def __init__(self, object):
-        db_name = './Databases/' + object + '_wiki.db'
-        self.art_list = './Databases/' + object + '_article_list'
+class Wiki_parser:
+    def __init__(self, lang):
+        self.lang = lang
+        db_name = './Databases/' + lang + '_wiki.db'
+        self.art_list = './Databases/' + lang + '_article_list'
         self.conn = sqlite3.connect(db_name)
         self.cur = self.conn.cursor()
 
-    def __call__(self):
+        self.pair_dict = dict()
+
+    def insert_db(self, cont):
+        self.create_db()
+
+        for line in cont:
+            self.count_pairs(line)
+
+        for (key, value) in self.pair_dict.items():
+            # print(key, value)
+            if self.key_exist(key):
+                self.cur.execute(''' SELECT * FROM pairs WHERE
+                                 key_pair=:key_pair''',
+                                 {'key_pair': key})
+                old_val = self.cur.fetchone()
+                # print(old_val)
+                self.cur.execute(''' UPDATE pairs SET use_count=:new_count
+                                 WHERE key_pair=:key_pair''',
+                                 {'key_pair': key,
+                                  'new_count': old_val[1] + value})
+            else:
+                self.cur.execute(''' INSERT INTO pairs VALUES
+                                 (:key_pair, :use_count)''',
+                                 {'key_pair': key,
+                                  'use_count': value})
+
+        self.conn.commit()
+
+    def key_exist(self, symbols):
+        self.cur.execute('''SELECT EXISTS(SELECT 1 FROM pairs
+                         WHERE key_pair=:key_pair)''',
+                         {'key_pair': symbols})
+
+        return self.cur.fetchone()[0]
+
+    def count_pairs(self, line):
+        for i in range(len(line) - 1):
+            pair = ''.join(line[i:i + 2])
+
+            if pair in self.pair_dict:
+                self.pair_dict[pair] += 1
+            else:
+                self.pair_dict[pair] = 1
+
+    def create_db(self):
         self.cur.execute('''CREATE TABLE IF NOT EXISTS pairs (
                      key_pair text,
                      use_count integer
                      )''')
 
+    def read_db(self):
+        # conn = sqlite3.connect(db_name)
+        # cur = conn.cursor()
+        return self.cur.execute(''' SELECT * FROM pairs ''')
+        # return(cur.fetchall())
+
+    def are_all_chars_out(self, line):
+        '''
+        Check if all chars in the list are out of the selected language range.
+        '''
+        # if any([in_range_arm(i) for i in line]):
+        if any([in_range(self.lang, i) for i in line]):
+            # print('False')
+            return 0
+        else:
+            # print('True')
+            return 1
+
+    # Do the cleaning. Need to decide on cleaning pattern
+    def cleanup(self, p_content):
+        out_list = []
+        for lin in p_content:
+            # print(type(lin))
+            if '=' in lin:
+                continue
+            if len(lin) == 0:
+                continue
+            if self.are_all_chars_out(lin):
+                continue
+            temp_str = ''
+            for s in lin:
+                # if in_range_arm(s):
+                if in_range(self.lang, s):
+                    if temp_str.endswith(' ') and s == ' ':
+                        continue
+                    temp_str += s
+
+            # This number choice is not perfect for latin languages
+            if len(set(temp_str)) < 5:
+                continue
+
+            lin = temp_str
+            out_list.append(lin)
+
+        return out_list
+
+    def parse(self):
+        # print(str(self.lang))
+        wiki.set_lang(self.lang)
+        # wiki.set_lang('de')
+        fo = open(self.art_list, 'a+')
+        article_set = set(fo.readlines())
+        t = wiki.random()
+        for i in range(2):
+            try:
+                print(article_set)
+                t = wiki.random()
+                print('HERE', t)
+                if t in article_set:
+                    return 0
+                else:
+                    article_set.add(t)
+                page = wiki.page(title=t)
+                # page = wiki.page('Համշեն_արեւմտահայերէն')
+                print(page.title)
+                # p_content = page.content
+                p_content = page.content.splitlines()
+                # p_content = ['ու ու ուզցգզցգզցգծ']
+                print(p_content)
+                print(len(p_content))
+
+                content_clean = self.cleanup(p_content)
+
+                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                print(content_clean)
+                print(len(content_clean))
+
+                self.insert_db(content_clean)
 
 
-def read_db():
-    conn = sqlite3.connect(db_name)
-    cur = conn.cursor()
-    return cur.execute(''' SELECT * FROM pairs ''')
-    # return(cur.fetchall())
+                # c.execute('SELECT Count(*) FROM pairs')
+                # print(c.fetchall())
 
+                # r = c.execute('SELECT * FROM pairs')
+                # print(c.fetchall())
+
+                # print(c['ու'], end=' qweqweqweq')
+
+                # print(key_exist('ու')[0], end=' !!!!!!!!!!!!!!!!!!!!!!!!\n\n\n')
+
+                print(article_set)
+            except Exception:
+                pass
+        article_set = map(lambda x: x + '\n', article_set)
+        print(article_set)
+        fo.writelines(article_set)
+        fo.close()
+
+
+
+lang_detect = {'hy': (1328, 1423), 'en': (48, 122) }
+# land_other_chars = {'hy': other_chars_hy, 'en': }
+
+def in_range(lang, s):
+    if lang_detect[lang][0] <= ord(s) <= lang_detect[lang][1]:
+        return 1
+    else:
+        return 0
 
 def in_range_arm(s):
     # other_chars = (' ', '(', ')', ',')
@@ -62,17 +207,6 @@ def in_range_arm(s):
         return 0
 
 
-def are_all_chars_out(line):
-    '''
-    Check if all chars in the list are out of the selected language range.
-    '''
-    if any([in_range_arm(i) for i in line]):
-        # print('False')
-        return 0
-    else:
-        # print('True')
-        return 1
-
 # def is_unicode_av_out(line):
 #     un_sum = 0
 #     for i in line:
@@ -80,127 +214,6 @@ def are_all_chars_out(line):
 
 #     print(un_sum)
 
-
-# Do the cleaning. Need to decide on cleaning patter
-def cleanup(p_content):
-    out_list = []
-    for lin in p_content:
-        # print(type(lin))
-        if '=' in lin:
-            continue
-        if len(lin) == 0:
-            continue
-        if are_all_chars_out(lin):
-            continue
-        temp_str = ''
-        for s in lin:
-            if in_range_arm(s):
-                if temp_str.endswith(' ') and s == ' ':
-                    continue
-                temp_str += s
-
-        # This nuimber choice is not perfect for latin languages
-        if len(set(temp_str)) < 5:
-            continue
-
-        lin = temp_str
-        out_list.append(lin)
-
-    return out_list
-
-
-def count_pairs(line):
-    for i in range(len(line) - 1):
-        pair = ''.join(line[i:i + 2])
-
-        if pair in pair_dict:
-            pair_dict[pair] += 1
-        else:
-            pair_dict[pair] = 1
-
-
-def key_exist(symbols):
-    c.execute('''SELECT EXISTS(SELECT 1 FROM pairs
-                                      WHERE key_pair=:key_pair)''',
-              {'key_pair': symbols})
-
-    return c.fetchone()[0]
-
-
-def insert_db(cont):
-    for line in cont:
-        count_pairs(line)
-
-    for (key, value) in pair_dict.items():
-        # print(key, value)
-        if key_exist(key):
-            c.execute(''' SELECT * FROM pairs WHERE key_pair=:key_pair''',
-                      {'key_pair': key})
-            old_val = c.fetchone()
-            # print(old_val)
-            c.execute('''UPDATE pairs SET use_count=:new_count
-                         WHERE key_pair=:key_pair''',
-                      {'key_pair': key, 'new_count': old_val[1] + value})
-        else:
-            c.execute('INSERT INTO pairs VALUES (:key_pair, :use_count)',
-                      {'key_pair': key, 'use_count': value})
-
-    conn.commit()
-
-
-def wiki_parse(lang):
-    print('yay')
-    # if len(arg) > 1:
-    #     raise Exception('Too many arguments, expect 1.')
-
-
-    return 0
-    wiki.set_lang(lang)
-    fo = open(art_list, 'a+')
-    article_set = set(fo.readlines())
-    for i in range(600):
-        try:
-            print(article_set)
-            t = wiki.random()
-            if t in article_set:
-                return 0
-            else:
-                article_set.add(t)
-            page = wiki.page(title=t)
-            # page = wiki.page('Համշեն_արեւմտահայերէն')
-            print(page.title)
-            # p_content = page.content
-            p_content = page.content.splitlines()
-            # p_content = ['ու ու ուզցգզցգզցգծ']
-            print(p_content)
-            print(len(p_content))
-
-            content_clean = cleanup(p_content)
-
-            print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-            print(content_clean)
-            print(len(content_clean))
-
-            insert_db(content_clean)
-
-
-            # c.execute('SELECT Count(*) FROM pairs')
-            # print(c.fetchall())
-
-            # r = c.execute('SELECT * FROM pairs')
-            # print(c.fetchall())
-
-            # print(c['ու'], end=' qweqweqweq')
-
-            # print(key_exist('ու')[0], end=' !!!!!!!!!!!!!!!!!!!!!!!!\n\n\n')
-
-            print(article_set)
-        except Exception:
-            pass
-    article_set = map(lambda x: x + '\n', article_set)
-    print(article_set)
-    fo.writelines(article_set)
-    fo.close()
 
 
 
@@ -230,23 +243,22 @@ def wiki_parse(lang):
 #     # conn.close()
 
 
+def main(arg):
+    wiki_data = Wiki_parser(arg)
+    wiki_data.parse()
 
+
+# Language preference is taken from argument
 if __name__ == '__main__':
-    wiki_data = Wiki_parser(sys.argv[1])
-    
-
     lang_list = {'hy', 'en', 'de'}
-    print(sys.argv[1] in lang_list)
     try:
-        print(type(sys.argv[1]))
         if len(sys.argv[1:]) != 1:
             raise ValueError
         if sys.argv[1] not in lang_list:
             raise Exception
 
-        wiki_parse(sys.argv[1])
+        main(sys.argv[1])
     except ValueError:
         sys.exit('Too many or too few arguments, expect 1.')
-    except Exception as e:
+    except Exception:
         sys.exit('Expect a value from %s set.' % lang_list)
-    
