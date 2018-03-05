@@ -99,12 +99,9 @@ class Wiki_parser:
         '''
         Check if all chars in the list are out of the selected language range.
         '''
-        # if any([in_range_arm(i) for i in line]):
         if any([in_range(self.lang, i) for i in line]):
-            # print('False')
             return 0
         else:
-            # print('True')
             return 1
 
     # Do the cleaning. Need to decide on cleaning pattern
@@ -120,7 +117,6 @@ class Wiki_parser:
                 continue
             temp_str = ''
             for s in lin:
-                # if in_range_arm(s):
                 if in_range(self.lang, s):
                     if temp_str.endswith(' ') and s == ' ':
                         continue
@@ -188,12 +184,22 @@ class Wiki_parser:
         fo.close()
 
 
-
-lang_detect = {'hy': (1328, 1423), 'en': (48, 122) }
-# land_other_chars = {'hy': other_chars_hy, 'en': }
-
 def in_range(lang, s):
-    if lang_detect[lang][0] <= ord(s) <= lang_detect[lang][1]:
+    lang_detect = {'hy': (1328, 1423),
+                   'en': (33, 126),
+                   'de': (33, 126)}  # check with German keyboard keys
+
+    lang_other_syms = {'hy': (' ', ',',),
+                       'en': (' ',),
+                       'de': (' ',)}
+
+    lang_other_chars = {'hy': (),
+                        'en': (),
+                        'de': ('ä', 'Ä', 'ö', 'Ö', 'ü', 'Ü', 'ß')}
+
+    print(type(lang_other_syms[lang]))
+    in_range = lang_detect[lang][0] <= ord(s) <= lang_detect[lang][1]
+    if in_range or s in (lang_other_syms[lang] + lang_other_chars[lang]):
         return 1
     else:
         return 0
@@ -213,34 +219,6 @@ def in_range_arm(s):
 #         un_sum += ord(i)
 
 #     print(un_sum)
-
-
-
-
-    # f, path = create_temp()
-    # with open(path, 'w') as temp_f:
-    #     temp_f.write(p_content)
-
-    # print('--------------------------')
-    # print(path)
-    # with open(path, 'r+') as temp_f:
-    # # for line in f:
-    #     print(temp_f.read())
-
-
-# Creating a temp file
-# def create_temp(prefix='tmp'):
-#     f, path = tempfile.mkstemp(prefix)
-#     # tempfile.mkstemp
-#     remove_at_exit(f, path)
-#     return f, path
-
-
-# Cleaning up at the end
-# def remove_at_exit(f, path):
-#     # atexit.register(os.close, f)
-#     atexit.register(os.remove, path)
-#     # conn.close()
 
 
 def main(arg):
