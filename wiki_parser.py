@@ -1,35 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-# import tempfile
-# import atexit
-
+import atexit
 # import os
-
 import sys
 
 import wikipedia as wiki
 import sqlite3
-# from itertools import chain
-
-# conn = sqlite3.connect(':memory:')
-
-# # lang = 'hy'
-
-# db_name = './Databases/' + lang + '_wiki.db'
-# art_list = './Databases/' + lang + '_article_list'
-
-# conn = sqlite3.connect(db_name)
-
-# c = conn.cursor()
-
-# c.execute('''CREATE TABLE IF NOT EXISTS pairs (
-#              key_pair text,
-#              use_count integer
-#              )''')
-
-
-# pair_dict = {}
-# # article_set = set()
 
 class Wiki_parser:
     def __init__(self, lang):
@@ -90,6 +67,7 @@ class Wiki_parser:
                      )''')
 
     def read_db(self):
+        atexit.register(self.conn.close())
         # conn = sqlite3.connect(db_name)
         # cur = conn.cursor()
         return self.cur.execute(''' SELECT * FROM pairs ''')
@@ -204,14 +182,6 @@ def in_range(lang, s):
     else:
         return 0
 
-def in_range_arm(s):
-    # other_chars = (' ', '(', ')', ',')
-    other_chars = (' ', ',')
-    if 1328 < ord(s) < 1423 or s in other_chars:
-        return 1
-    else:
-        return 0
-
 
 # def is_unicode_av_out(line):
 #     un_sum = 0
@@ -219,6 +189,12 @@ def in_range_arm(s):
 #         un_sum += ord(i)
 
 #     print(un_sum)
+
+# Cleaning up at the end
+# def remove_at_exit(f, path):
+    # atexit.register(os.close, f)
+    # atexit.register(os.remove, path)
+    # conn.close()
 
 
 def main(arg):
