@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 
-import scipy.interpolate
+# import scipy.interpolate
 import numpy as np
 import matplotlib.pyplot as plt
 
-class layout_match(object):
+
+class Layout_match(object):
     '''
     Matching symbols to key names
     '''
@@ -24,15 +25,19 @@ class layout_match(object):
         '''
 
         self.df.columns = ['k_name', 'reg', 'cap']
-        # print(self.df)
+        print(self.df)
 
+        # Adding lower case
         mydict = dict(zip(self.df.reg, self.df.k_name))
+        #  Adding capitals
         mydict.update(dict(zip(self.df.cap, self.df.k_name)))
+        print(mydict)
         # return mydict
 
     def create_key_distance(self):
         '''
         Creating some info on key positions, counting from left top edge
+        This should be modified for each keyboard type !!!
         '''
         self.df.columns = ['k_name', 'dist', 'row']
         # Loops are ugly as keyboard different models are uglier
@@ -56,8 +61,11 @@ class layout_match(object):
         # print(self.df)
         return self.df
 
+    # def get_key_weights(self, first, second):
 
-def layout_select(key_symbols: list):
+
+
+def layout_select(key_symbols):
     '''
     Returns the filename to compile the layout filename
     '''
@@ -118,11 +126,12 @@ def make_plot(key_dist, area):
 
 
 if __name__ == '__main__':
-    import matplotlib.cm as cm
-    layout = layout_match()
+    # import matplotlib.cm as cm
+    layout = Layout_match()
     layout.read_file('hy_EasternAlt')
     layout.get_symbol_name_dict()
     key_dist = layout.create_key_distance()
+    print(key_dist)
 
     area = (15 * np.random.rand(12))**2
     make_plot(key_dist, area)
