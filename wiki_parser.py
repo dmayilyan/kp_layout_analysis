@@ -8,6 +8,7 @@ import sys
 import wikipedia as wiki
 import sqlite3
 
+
 class Wiki_parser:
     def __init__(self, lang):
         self.lang = lang
@@ -19,7 +20,7 @@ class Wiki_parser:
         self.pair_dict = dict()
 
     def insert_db(self, cont):
-        self.create_db()
+        self._create_db()
 
         for line in cont:
             self.count_pairs(line)
@@ -60,7 +61,7 @@ class Wiki_parser:
             else:
                 self.pair_dict[pair] = 1
 
-    def create_db(self):
+    def _create_db(self):
         self.cur.execute('''CREATE TABLE IF NOT EXISTS pairs (
                      key_pair text,
                      use_count integer
@@ -116,7 +117,7 @@ class Wiki_parser:
         fo = open(self.art_list, 'a+')
         article_set = set(fo.readlines())
         t = wiki.random()
-        for i in range(2):
+        for i in range(500):
             try:
                 print(article_set)
                 t = wiki.random()
@@ -175,7 +176,7 @@ def in_range(lang, s):
                         'en': (),
                         'de': ('ä', 'Ä', 'ö', 'Ö', 'ü', 'Ü', 'ß')}
 
-    print(type(lang_other_syms[lang]))
+    # print(type(lang_other_syms[lang]))
     in_range = lang_detect[lang][0] <= ord(s) <= lang_detect[lang][1]
     if in_range or s in (lang_other_syms[lang] + lang_other_chars[lang]):
         return 1
