@@ -17,3 +17,16 @@ A sample output looks like:
 ## Layouts
 
 Layouts are taken from `/usr/share/X11/xkb/symbols/`
+
+
+## How to
+
+### `wiki_parser.py`
+
+To add (or create) a database of 500 articles from wikipedia: `python3 wiki_parser.py [lang]`, where *[lang]* is one of the three languages available:
+
+- `hy`: Armenian (Doesn't differ eastern and western cases)
+- `de`: German
+- `en`: English
+
+List of the processed article titles will be printed out in the end, as well as, written down in `[lang]_article_list` under `Databases` folder.
