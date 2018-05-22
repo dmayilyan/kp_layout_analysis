@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+"""Module to catch keystrokes typed by the user."""
 import subprocess
 import sys
 import tty
@@ -20,9 +22,7 @@ class _GetchUnix:
 
 
 def getKey():
-    '''
-    Getting a key
-    '''
+    """Get a key."""
     inkey = _GetchUnix()
     for i in range(sys.maxsize):
         k = inkey()
@@ -32,9 +32,7 @@ def getKey():
 
 
 def make_dir(file_path):
-    '''
-    Checking data directory. If it doesn't exist, create it.
-    '''
+    """Check data directory existance. If it doesn't exist, create it."""
     if os.path.isdir(file_path) is False:
         # print('Data folder doesn't exists\nMaking the folder')
         print('Պանակը գոյություն չունի\n\nՍտեղծում եմ...')
@@ -56,26 +54,20 @@ def make_dir(file_path):
 
 
 def write_kb_info(f_path, identifier):
-    '''
-    Writing keyboard info of the writer.
-    '''
+    """Write keyboard info of the writer."""
     filename = f_path + identifier + '_kb_info'
     with open(filename, 'w') as f:
         subprocess.Popen(['setxkbmap', '-query'], stdout=f)
 
 
 def do_tagging(f_path, t_posfix, d_posfix, ident):
-    '''
-    Updating text and data files with hash of the data file.
-    '''
+    """Update text and data files with hash of the data file."""
     os.rename(f_path + t_posfix, f_path + ident + t_posfix)
     os.rename(f_path + d_posfix, f_path + ident + d_posfix)
 
 
 def get_hash(filename):
-    '''
-    Getting hash of the data file.
-    '''
+    """Get hash of the data file."""
     md5 = hashlib.md5()
     with open(filename, 'rb') as f:
         file_content = f.read(65536)
